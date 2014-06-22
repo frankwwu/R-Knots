@@ -1,0 +1,21 @@
+Read .for file with read.fwf
+========================================================
+
+The .for file is a fixed width file. It takes several tries to read it. First use read.csv to read in the file then examine its format.
+
+```{r}
+path<-"http://www.cpc.ncep.noaa.gov/data/indices/wksst8110.for"
+d<-read.csv(path)
+head(d)
+```
+
+From the result, it appears we need to skip a few lines of text. And we can easily figure out each column widths. To keep things simple, we will not read column headers. Now we can specify these parameters in the read.fwf.
+
+```{r}
+path<-"http://www.cpc.ncep.noaa.gov/data/indices/wksst8110.for"
+df=read.fwf(file=url(path), skip=4, widths=c(12,7,4,9,4,9,4,9,4))
+head(df)
+```
+
+The result is exactly what we wanted.
+
