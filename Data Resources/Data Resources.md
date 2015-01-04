@@ -1,5 +1,8 @@
 Data Resources
 ==============
+
+Fuel Economy [link](http://www.fueleconomy.gov/feg/ws/index.shtml#vehicle)
+
 Survey data from the United States [link](http://www.asdfree.com/ )
 
 Gapminder [link](http://www.gapminder.org/)

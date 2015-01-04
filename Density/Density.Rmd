@@ -1,8 +1,7 @@
 ---
 title: "ggplot2: geom_violin vs. geom_boxplot vs. geom_density"
-output: html_document
+output: word_document
 ---
-
 
 ```{r}
 library(datasets)
@@ -36,4 +35,3 @@ ggplot(ToothGrowth,aes(x=len, fill=dose)) +
     coord_flip()
 
 ```
-

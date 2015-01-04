@@ -1,6 +1,6 @@
 ---
 title: "Yahoo Quote"
-output: html_document
+output: word_document
 ---
 
 
