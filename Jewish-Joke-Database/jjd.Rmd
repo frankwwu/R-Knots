@@ -1,19 +1,14 @@
 ---
 title: "JJD"
-author: "Frank Wu"
-date: "Saturday, September 20, 2014"
 output: html_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
 require(RCurl)
 require(XML)
-url<-"http://www.awordinyoureye.com/"
-webpage <- getURL(url)
+baseUrl<-"http://www.awordinyoureye.com/"
+webpage <- getURL(baseUrl)
 webpage <- readLines(tc <- textConnection(webpage)); 
 close(tc)
 
@@ -22,19 +17,18 @@ mainPage <- htmlTreeParse(webpage, error=function(...){}, useInternalNodes = TRU
 #links
 
 links = xpathApply(mainPage, "//a[@href]", xmlGetAttr, "href")
-links
+links<-grep("joke", links)
+for (i in 1:length(links) ) {
+  url<-paste(baseUrl ,links[i], sep='')
+  webpage <- getURL(url)
+  webpage <- readLines(tc <- textConnection(webpage)); 
+  close(tc)
+  page <- htmlTreeParse(webpage, error=function(...){}, useInternalNodes = TRUE)
+  
+  # Find title: <p><b><font face="Arial,Helvetica">
+  # Fine joke:  <font face="Arial,Helvetica">
+}
 
-#tableNodes = getNodeSet(mainPage, "//table")
-# Trim first three tables
-
-tableNodes
 
 ```
 
-You can also embed plots, for example:
-
-```{r, echo=FALSE}
-
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
