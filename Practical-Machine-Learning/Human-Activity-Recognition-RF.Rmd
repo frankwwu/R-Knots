@@ -1,0 +1,104 @@
+---
+title: "Human Activity Recognition"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+This machine learning project is to predict the correct or incorrect way of the unilateral dumbbell biceps curl based in the measured data. The data collected includes five different fashions: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). [Detail](http://groupware.les.inf.puc-rio.br/har) 
+
+Both [training data](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv) and [test data](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv) are provided.
+
+The analysis begins with data cleaning and feature selection. The Random Forest training model with parallel processing is then created. The model also includes k-fold cross validation. In the end, the test data is used for prediction.
+
+### Loading libraries
+
+```{r warning=FALSE, message=FALSE}
+library(randomForest)
+library(doParallel)
+library(caret)
+library(ParallelForest)
+```
+
+### Reading the training data
+
+```{r warning=FALSE, message=FALSE}
+training<-read.csv("pml-training.csv", na.strings=c("NA", "#DIV/0!"))
+dim(training)
+```
+
+### Feature engineering
+
+Subset the original training dataset to include only the predictor features and the outcome variable, classe.
+
+```{r}
+isMissing <- sapply(training, function (x) any(is.na(x) | x == ""))
+isPredictor <- !isMissing & grepl("classe|belt|[^(fore)]arm|dumbbell|forearm", names(isMissing))
+features <- names(isMissing)[isPredictor]
+features
+cleanData = training[,features]
+dim(cleanData)
+```
+
+### Random Forest training model with parallel processing
+
+Configuring parallel processing based on the [discription](https://github.com/lgreski/datasciencectacontent/blob/master/markdown/pml-randomForestPerformance.md). The 5-fold validation is specified in the <code>trainControl</code> function.
+
+```{r}
+# convention to leave 1 core for OS
+cluster <- makeCluster(detectCores() - 1)
+registerDoParallel(cluster)
+# The number of resampling iterations is 5.
+fitControl <- trainControl(method = "cv", number = 5, allowParallel = TRUE)
+```
+
+Creating the Random Forest training model; printing out the detail of resampling and accuracy.
+
+```{r}
+modelRF <- train(classe~., data=cleanData, method="rf", trControl=fitControl)
+modelRF
+```
+
+Deregistering the parallel processing cluster; and printing out the cross-validated confusion matrix.
+
+```{r}
+stopCluster(cluster)
+confusionMatrix.train(modelRF)
+```
+
+### Displaying and saving the model variables
+
+```{r}
+varImp(modelRF)
+modelRF$finalModel
+save(modelRF, file="modelRF.RData")
+```
+
+### Predicting with the test data set
+
+Use the above prediction model to predict 20 different test cases specified in the test data file; then printing out the predicted classes of the 20 tests.
+
+```{r}
+test<-read.csv("pml-testing.csv", na.strings=c("NA", "#DIV/0!"))
+isMissing <- sapply(test, function (x) any(is.na(x) | x == ""))
+isPredictor <- !isMissing & grepl("classe|belt|[^(fore)]arm|dumbbell|forearm", names(isMissing))
+features <- names(isMissing)[isPredictor]
+testData<-test[,features]
+predRF<-predict(modelRF, testData)
+predRF
+```
+
+### Conclusion
+
+The Random Forest model can achieve high accuracy with relatively short runtime in this analysis.
+
+### References
+
+[Prediction Assignment Writeup](https://www.coursera.org/learn/practical-machine-learning/peer/R43St/prediction-assignment-writeup)
+
+[Improving Performance of Random Forest in caret::train()](https://github.com/lgreski/datasciencectacontent/blob/master/markdown/pml-randomForestPerformance.md)
+
+[Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf)
+
+
+
