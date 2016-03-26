@@ -1,0 +1,150 @@
+---
+title: "Boston Code Camp 24"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+```{r warning=FALSE, message=FALSE}
+library(RODBC)
+library(knitr)
+library(plyr)
+library(ggplot2)
+library(foreach)
+library(lubridate)
+```
+
+
+### Conneting to SQL Server database with RODBC
+Connecting to AdventureWorks2014 database with <code>RODBC</code>. Querying with the stored procedure and the SQL statement. Don't forget to disconnect the database in the end.
+
+```{r}
+# Connecting the database with RODBC
+conn <- odbcDriverConnect("Driver=ODBC Driver 11 for SQL Server;Server=BEETS;Database=AdventureWorks2014;Trusted_Connection=yes")
+
+# Querying employees with the stored procedure
+employees<-sqlQuery(conn,"exec dbo.uspGetEmployeeManagers @BusinessEntityID = 9")
+
+# Querying the sales with the SQL statement
+sales <- sqlQuery(conn, "SELECT soh.OrderDate,                                            
+                        cr.Name as CountryRegion,
+                        soh.TotalDue AS TotalDue
+                        FROM [AdventureWorks2014].[Sales].[SalesOrderHeader] soh
+                        INNER JOIN [AdventureWorks2014].[Sales].[SalesTerritory] AS t 
+                            ON t.territoryid=soh.territoryid
+                        INNER JOIN [AdventureWorks2014].[Person].[CountryRegion] AS cr 
+                            ON cr.countryregioncode=t.countryregioncode
+                        INNER JOIN [AdventureWorks2014].[Sales].[SalesOrderDetail] AS sod
+                            ON soh.SalesOrderID = sod.SalesOrderID
+                        INNER JOIN [AdventureWorks2014].[Production].[Product] AS p
+                            ON sod.ProductID = p.ProductID
+                        INNER JOIN [AdventureWorks2014].[Production].[ProductSubcategory] AS ps
+                            ON p.ProductSubcategoryID = ps.ProductSubcategoryID                      
+                        WHERE ps.Name like '%Bikes%'
+                        ORDER BY cr.Name")
+
+# Closing the database connection
+close(conn)
+
+```
+
+###Displaying employees in the table with knitr
+Generating a simple table with <code>knitr</code>. 
+
+```{r}
+kable(employees)
+```
+
+[More](http://www.r-bloggers.com/fast-track-publishing-using-knitr-table-mania-part-iv/) for using tables with [knitr](https://cran.r-project.org/web/packages/knitr/knitr.pdf)
+
+###Calculating the bike sales per country with plyr
+
+plyr package is for transforming subsets of data -- split different data types, apply function, and return results in the same or a different data type. 
+
+| Data Type            | array | data frame | list  |n replicates|function arguments|
+|----------------------|-------|------------|-------|------------|------------------|
+|**array**             | aaply | adply      | alply | arply      | amply            |
+|**data frame**        | daply | ddply      | dlply | drply      | dmply            |
+|**list**              | laply | ldply      | llply | lrply      | lmply            |
+|**n replicates**      | raply | rdply      | rlply | rrply      | rmply            |
+|**function arguments**| maply | mdply      | mlply | mrply      | mmply            |
+
+
+```{r}
+ddply(sales, .(CountryRegion), function(sales) sum(sales$TotalDue))
+```
+
+Here is a fast introduction to [plyr](http://www.r-bloggers.com/a-fast-intro-to-plyr-for-r/).
+
+###Visualizing the bike sales per country with ggplot2
+
+The ggplot2 package offers a powerful graphics language for creating elegant and complex plots. Here is a [cheat sheet](http://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf). Following example demos:
+
+- Color coding with countries
+
+- Set labels
+
+- Set the title
+
+```{r}
+
+ggplot(data=sales,aes(x=year(OrderDate), y=TotalDue/1000000, fill=CountryRegion)) + 
+  geom_bar(stat="identity") +  
+  labs(x="Year",y="Value ($m)") +
+  scale_fill_brewer(type="qual") +
+  ggtitle("Total Bike Sales Per Country") 
+```
+
+###Calculating the bike sales per country per year
+
+- Use <code>lubridate</code> to get years from date-time. Here is a [lubridate tutorial](https://cran.r-project.org/web/packages/lubridate/vignettes/lubridate.html).
+
+```{r}
+years <- unique(year(sales$OrderDate))
+yearBegin <- min(years)
+yearEnd <- max(years)
+yearBegin:yearEnd
+foreach(y=yearBegin:yearEnd) %do% ddply(sales[year(sales$OrderDate)==y,], .(CountryRegion), function(sales) sum(sales$TotalDue))
+
+#for (y in yearBegin:yearEnd ) {
+#  ddply(sales[year(sales$OrderDate)==y,], .(CountryRegion), function(sales) sum(sales$TotalDue))
+#}
+```
+
+###Visualizing the bike sales per country per year
+
+- Lay out panels in a grid per country/region
+
+- Hide the legend
+
+- Rotate the x-axis text 90 degree
+
+- Set the palette to 3 for different color scheme.
+
+```{r}
+ggplot(data=sales,aes(x=year(OrderDate),y=TotalDue/1000000, fill=CountryRegion)) +
+  geom_bar(stat="identity") + 
+  facet_grid(.~CountryRegion) +
+  theme(legend.position="none", axis.text.x=element_text(angle=90)) +
+  labs(x="Year",y="Value ($m)") +
+  scale_fill_brewer(type="qual", palette=3) +
+  ggtitle("Total Bike Sales Per Country Per Year") 
+```
+
+###Visualizing the sales per month
+
+- Use <code>lubridate</code> to get months from date-time
+
+```{r}
+ggplot(data=sales,aes(x=month(OrderDate),  y=TotalDue/1000000, fill=CountryRegion)) + 
+  geom_bar(stat="identity") + 
+  labs(x="Month", y="Value ($m)") +
+  scale_fill_brewer(type="qual") +
+  scale_x_discrete("Month", limits=c(1:12)) +
+  ggtitle("Total Bike Sales Per Month")  
+```
+
+More examples of [ggplot2](http://rstudio-pubs-static.s3.amazonaws.com/5051_39c30acbb432498fa1a290f166c6b403.html)
+
+
