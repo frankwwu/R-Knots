@@ -1,0 +1,122 @@
+---
+title: "Titanic - Decision Trees"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+### Variable Descriptions
+
+**survival**:  Survival (0 = No; 1 = Yes) 
+
+**pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
+
+**name**:      Name 
+
+**sex**:       Sex 
+
+**age**:       Age 
+
+**sibsp**:     Number of Siblings/Spouses Aboard 
+
+**parch**:     Number of Parents/Children Aboard 
+
+**ticket**:    Ticket Number 
+
+**fare**:      Passenger Fare 
+
+**cabin**:     Cabin 
+
+**embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton)  
+
+```{r warning=FALSE, message=FALSE}
+library(rpart)
+library(rattle)
+library(rpart.plot)
+library(dplyr)
+library(RCurl)
+```
+
+### Reading data
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/train.csv')
+train <- read.csv(text = url) 
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/test.csv')
+test <- read.csv(text = url) 
+```
+
+### Removing NA.
+
+```{r}
+train<-train[, !(colnames(train) %in% c('name'))]
+train <-train %>% na.omit()
+test<-test[, !(colnames(test) %in% c('name'))]
+test <- test %>% na.omit()
+```
+
+### 1. Selecting features
+
+```{r}
+train$Survived <- factor(train$Survived)
+formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
+```
+
+### 2. Classification Tree
+Creating tree
+
+```{r}
+fit <- rpart(formula, data=train, method="class")
+fancyRpartPlot(fit)
+```
+
+### prune tree
+Prune back the tree to avoid overfitting the data. Typically, you will want to select a tree size that minimizes the cross-validated error, the xerror column printed by printcp( ).
+
+```{r}
+# prune the tree 
+pfit<- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
+fancyRpartPlot(pfit)
+```
+
+### Prediction
+
+```{r}
+Prediction <- predict(pfit, test, type = "prob")
+#Prediction
+```
+
+### Trying to tweak rpart.control control parameters.
+
+```{r}
+fit <- rpart(formula, data=train, method="class", control=rpart.control(minsplit=2, cp=0))
+fancyRpartPlot(fit)
+
+fit <- rpart(formula, data=train, method="class", control=rpart.control(minsplit=2, cp=0, minbucket=2))
+fancyRpartPlot(fit)
+```
+
+### 3. Regression Tree
+
+```{r}
+fit <- rpart(formula, data=train, method="anova")
+# Plot tree 
+fancyRpartPlot(fit)
+# Visualize cross-validation results
+plotcp(fit) 
+# Detailed summary of splits
+summary(fit)
+```
+
+### 4. Random Forests
+
+Constructing a multitude of decision trees at training time. Random decision forests correct for decision trees' habit of overfitting to their training set.
+
+```{r}
+library(randomForest)
+fit <- randomForest(formula, data=train)
+print(fit)
+importance(fit)
+```
+
+

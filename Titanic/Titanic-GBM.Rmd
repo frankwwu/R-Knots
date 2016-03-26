@@ -1,0 +1,97 @@
+---
+title: "Titanic: Machine Learning from Disaster - GBM (Gradient Boosting Machine)"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+### Variable Descriptions
+
+**survival**:  Survival (0 = No; 1 = Yes) 
+
+**pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
+
+**name**:      Name 
+
+**sex**:       Sex 
+
+**age**:       Age 
+
+**sibsp**:     Number of Siblings/Spouses Aboard 
+
+**parch**:     Number of Parents/Children Aboard 
+
+**ticket**:    Ticket Number 
+
+**fare**:      Passenger Fare 
+
+**cabin**:     Cabin 
+
+**embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
+ 
+ 
+```{r warning=FALSE, message=FALSE}
+library(caret)
+library(dplyr)
+library(ggplot2)
+library(RCurl)
+```
+
+### Reading data
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/train.csv')
+train <- read.csv(text = url) 
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/test.csv')
+test <- read.csv(text = url) 
+```
+
+### Removing NA.
+
+```{r}
+train<-train[, !(colnames(train) %in% c('name'))]
+train <-train %>% na.omit()
+test<-test[, !(colnames(test) %in% c('name'))]
+test <- test %>% na.omit()
+```
+
+### Selecting features
+
+```{r}
+train$Survived <- factor(train$Survived)
+formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
+```
+
+### Creating GBM model
+
+```{r}
+gbmModel <- suppressMessages(train(formula, data=train, method="gbm"))
+gbmModel
+ggplot(varImp(gbmModel))
+ggplot(gbmModel, metric = "Accuracy")
+ggplot(gbmModel, metric = "Kappa")
+```
+
+### Predicting with the test data set
+
+```{r}
+Survived <- predict(gbmModel, test)
+r<-cbind(Survived, test)
+ggplot(r, aes(Age, Fare, color=Survived)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(Pclass~Sex) +
+  ggtitle("Test Data Predicted")
+
+ggplot(train, aes(Age, Fare, color=Survived)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(Pclass~Sex) +
+  ggtitle("Training Data")
+
+total<-rbind(train, r)
+ggplot(total, aes(Age, Fare, color=Survived)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(Pclass~Sex) +
+  ggtitle("Total")
+```
+

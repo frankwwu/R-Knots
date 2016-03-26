@@ -1,0 +1,96 @@
+---
+title: "Titanic: Random forests"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+### Variable Descriptions
+
+**survival**:  Survival (0 = No; 1 = Yes) 
+
+**pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
+
+**name**:      Name 
+
+**sex**:       Sex 
+
+**age**:       Age 
+
+**sibsp**:     Number of Siblings/Spouses Aboard 
+
+**parch**:     Number of Parents/Children Aboard 
+
+**ticket**:    Ticket Number 
+
+**fare**:      Passenger Fare 
+
+**cabin**:     Cabin 
+
+**embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
+ 
+ 
+```{r warning=FALSE, message=FALSE}
+library(caret)
+library(dplyr)
+library(ggplot2)
+library(RCurl)
+```
+
+### 1. Reading data
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/train.csv')
+train <- read.csv(text = url) 
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/test.csv')
+test <- read.csv(text = url) 
+```
+
+### 2.  Removing NA.
+
+```{r}
+train<-train[, !(colnames(train) %in% c('name'))]
+train <-train %>% na.omit()
+test<-test[, !(colnames(test) %in% c('name'))]
+test <- test %>% na.omit()
+```
+
+### 3. Selecting features
+
+```{r}
+train$Survived <- factor(train$Survived)
+formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
+```
+
+### 4. Creating random forests model
+
+```{r}
+fit <- suppressMessages(train(formula, data=train, method="rf"))
+fit
+ggplot(varImp(fit))
+ggplot(fit, metric = "Accuracy")
+ggplot(fit, metric = "Kappa")
+```
+
+### 5. Predicting with the test data set
+
+```{r}
+Survived <- predict(fit, test)
+r<-cbind(Survived, test)
+ggplot(r, aes(Age, Fare, color=Survived)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(Pclass~Sex) +
+  ggtitle("Test Data Predicted")
+
+ggplot(train, aes(Age, Fare, color=Survived)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(Pclass~Sex) +
+  ggtitle("Training Data")
+
+total<-rbind(train, r)
+ggplot(total, aes(Age, Fare, color=Survived)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(Pclass~Sex) +
+  ggtitle("Total")
+```
+

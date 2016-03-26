@@ -1,0 +1,117 @@
+---
+title: "Bike Sharing: Decision Trees - rpart"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+### Data Fields
+**datetime** - hourly date + timestamp
+
+**season** -  1 = spring, 2 = summer, 3 = fall, 4 = winter 
+
+**holiday** - whether the day is considered a holiday
+
+**workingday** - whether the day is neither a weekend nor holiday
+
+**weather** - 1: Clear, Few clouds, Partly cloudy, Partly cloudy
+
+2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist 
+
+3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds 
+
+4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog 
+
+**temp** - temperature in Celsius
+
+**atemp** - "feels like" temperature in Celsius
+
+**humidity** - relative humidity
+
+**windspeed** - wind speed
+
+**casual** - number of non-registered user rentals initiated
+
+**registered** - number of registered user rentals initiated
+
+**count** - number of total rentals
+
+
+```{r warning=FALSE, message=FALSE}
+library(rpart)
+library(rpart.plot)
+library(partykit)
+library(RCurl)
+```
+
+### 1. Reading files
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Bike%20Sharing/train.csv')
+train <- read.csv(text = url) 
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Bike%20Sharing/test.csv')
+test <- read.csv(text = url) 
+```
+
+### 2. Feature selection
+
+Since temp and atemp are highly correlated, we can remove one of them from the training data. We will remove atemp in following feature set.
+
+```{r}
+train<-train[, !(colnames(train) %in% c('atemp'))]
+time <- factor(substring(train$datetime, 12, 20))
+train$hour<- as.numeric(substr(time, 1, 2))
+train$month <- factor(substring(as.Date(train$datetime), 6, 7))
+train$workingday <- factor(train$workingday)
+
+test<-test[, !(colnames(test) %in% c('atemp'))] 
+time <- factor(substring(test$datetime, 12, 20))
+test$hour<- as.numeric(substr(time, 1, 2))
+test$month <- factor(substring(as.Date(test$datetime), 6, 7))
+test$workingday <- factor(test$workingday)
+```
+
+```{r}
+formula <- count ~ month + weather + temp + humidity + hour + workingday + holiday
+```
+
+### 3. Creating model
+
+Let rpart() to make an intelligent guess of whether using recursive partitioning and regression trees model.
+
+```{r}
+fit <- rpart(formula, data=train)
+
+# Print the tree
+as.party(fit)
+
+# Plot the tree
+rpart.plot(fit, main="default rpart.plot\n(type = 0, extra = 0)")
+
+# Save the plot to a file
+dev.copy(png, file="Bike-Sharing-DT-rpart.png")  
+dev.off()
+
+# Visualize cross-validation results
+plotcp(fit)
+
+# Another way to visualize cross-validation results with two plots in one row
+par(mfrow=c(1,2))
+rsq.rpart(fit)
+```
+
+### 4. Prediction
+
+```{r}
+predict <- predict(fit, test)
+#plot(predict, type = "simple")
+#text(predict)
+
+# Save the result to a file
+result <- data.frame(datetime = test$datetime, temp = test$temp, month = test$month, workingday = test$workingday, count=predict)
+write.csv(result, file="rpart_result.csv", row.names=FALSE)
+```
+
+### 5. Discussion
+
+It appears hour, temp, month, and workingday have major impact to the model; while weather and humidity are negligible. The holiday is correlated to workingday.
