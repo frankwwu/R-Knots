@@ -49,10 +49,10 @@ test <- read.csv(text = url)
 ### 2. Removing names and NAs.
 
 ```{r}
-train<-train[, !(colnames(train) %in% c('name'))]
+train<-train[, !(colnames(train) %in% c('PassengerId', 'Name', 'Ticket', 'Cabin'))]
 train <-train %>% na.omit()
 dim(train)
-test<-test[, !(colnames(test) %in% c('name'))]
+test<-test[, !(colnames(test) %in% c('PassengerId', 'Name', 'Ticket', 'Cabin'))]
 test <- test %>% na.omit()
 dim(test)
 ```
@@ -68,6 +68,7 @@ formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
 Creating tree
 
 ```{r}
+set.seed(2020)
 fit <- rpart(formula, data=train, method="class")
 as.party(fit)
 rpart.plot(fit, main="default rpart.plot\n(type = 0, extra = 0)")
@@ -84,4 +85,5 @@ rsq.rpart(fit)
 
 ```{r}
 predict <- predict(fit, test, type = "prob")
+predict
 ```
