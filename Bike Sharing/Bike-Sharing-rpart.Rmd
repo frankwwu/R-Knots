@@ -80,6 +80,7 @@ formula <- count ~ month + weather + temp + humidity + hour + workingday + holid
 Let rpart() to make an intelligent guess of whether using recursive partitioning and regression trees model.
 
 ```{r}
+set.seed(200)
 fit <- rpart(formula, data=train)
 
 # Print the tree

@@ -161,7 +161,8 @@ test$workingday &lt;- factor(test$workingday)</code></pre>
 </div>
 <div id="conditional-inference-trees" class="section level3">
 <h3>3. Conditional Inference Trees</h3>
-<pre class="r"><code>fit &lt;- ctree(formula, data=train)
+<pre class="r"><code>set.seed(200)
+fit &lt;- ctree(formula, data=train)
 
 # Print the tree
 print(fit)</code></pre>

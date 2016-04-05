@@ -79,6 +79,7 @@ formula <- count ~ month + weather + temp + humidity + hour + workingday + holid
 
 
 ```r
+set.seed(200)
 fit <- ctree(formula, data=train)
 
 # Print the tree
