@@ -1,28 +1,28 @@
-# Titanic: gbm
+# Titanic: GBM
 
 ### Variable Descriptions
 
-**survival**:  Survival (0 = No; 1 = Yes) 
+**Survival**:  Survival (0 = No; 1 = Yes) 
 
-**pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
+**Pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
 
-**name**:      Name 
+**Name**:      Name 
 
-**sex**:       Sex 
+**Sex**:       Sex 
 
-**age**:       Age 
+**Age**:       Age 
 
-**sibsp**:     Number of Siblings/Spouses Aboard 
+**SibSp**:     Number of Siblings/Spouses Aboard 
 
-**parch**:     Number of Parents/Children Aboard 
+**Parch**:     Number of Parents/Children Aboard 
 
-**ticket**:    Ticket Number 
+**Ticket**:    Ticket Number 
 
-**fare**:      Passenger Fare 
+**Fare**:      Passenger Fare 
 
-**cabin**:     Cabin 
+**Cabin**:     Cabin 
 
-**embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
+**Embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
  
  
 
@@ -61,7 +61,7 @@ train$Survived <- factor(train$Survived)
 formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
 ```
 
-### 4. Creating random forests model
+### 4. Creating GBM model
 
 
 ```r
