@@ -2,27 +2,27 @@
 
 ### Variable Descriptions
 
-**survival**:  Survival (0 = No; 1 = Yes) 
+**Survival**:  Survival (0 = No; 1 = Yes) 
 
-**pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
+**Pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
 
-**name**:      Name 
+**Name**:      Name 
 
-**sex**:       Sex 
+**Sex**:       Sex 
 
-**age**:       Age 
+**Age**:       Age 
 
-**sibsp**:     Number of Siblings/Spouses Aboard 
+**Sibsp**:     Number of Siblings/Spouses Aboard 
 
-**parch**:     Number of Parents/Children Aboard 
+**Parch**:     Number of Parents/Children Aboard 
 
-**ticket**:    Ticket Number 
+**Ticket**:    Ticket Number 
 
-**fare**:      Passenger Fare 
+**Fare**:      Passenger Fare 
 
-**cabin**:     Cabin 
+**Cabin**:     Cabin 
 
-**embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton)  
+**Embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
 
 
 ```r
@@ -47,9 +47,9 @@ test <- read.csv(text = url)
 
 
 ```r
-train<-train[, !(colnames(train) %in% c('name'))]
+train<-train[, !(colnames(train) %in% c('Name', 'Ticket', 'Cabin'))]
 train <-train %>% na.omit()
-test<-test[, !(colnames(test) %in% c('name'))]
+test<-test[, !(colnames(test) %in% c('Name', 'Ticket', 'Cabin'))]
 test <- test %>% na.omit()
 ```
 
@@ -61,23 +61,22 @@ train$Survived <- factor(train$Survived)
 formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
 ```
 
-### 2. Classification Tree
-Creating tree
+### 2. Creating classification tree
 
 
 ```r
+set.seed(200)
 fit <- rpart(formula, data=train, method="class")
 fancyRpartPlot(fit)
 ```
 
 ![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-5-1.png)
 
-### prune tree
+### Prune the tree
 Prune back the tree to avoid overfitting the data. Typically, you will want to select a tree size that minimizes the cross-validated error, the xerror column printed by printcp( ).
 
 
 ```r
-# prune the tree 
 pfit<- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
 fancyRpartPlot(pfit)
 ```
@@ -117,7 +116,7 @@ fancyRpartPlot(fit)
 
 ![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-8-2.png)
 
-### 3. Regression Tree
+### 3. Creating regression tree
 
 
 ```r
@@ -146,14 +145,14 @@ summary(fit)
 ##   n= 714 
 ## 
 ##           CP nsplit rel error    xerror       xstd
-## 1 0.29033302      0 1.0000000 1.0022639 0.01435748
-## 2 0.08404023      1 0.7096670 0.7124556 0.03606447
-## 3 0.03132439      2 0.6256268 0.6294216 0.03453894
-## 4 0.03120810      3 0.5943024 0.6157790 0.03629838
-## 5 0.02580785      4 0.5630943 0.5977932 0.03557353
-## 6 0.01881840      5 0.5372864 0.5925192 0.03605134
-## 7 0.01005920      6 0.5184680 0.5694870 0.03577753
-## 8 0.01000000      7 0.5084088 0.5829908 0.03690591
+## 1 0.29033302      0 1.0000000 1.0029968 0.01437210
+## 2 0.08404023      1 0.7096670 0.7127836 0.03606339
+## 3 0.03132439      2 0.6256268 0.6288479 0.03456130
+## 4 0.03120810      3 0.5943024 0.6311605 0.03631107
+## 5 0.02580785      4 0.5630943 0.5976796 0.03559951
+## 6 0.01881840      5 0.5372864 0.5802332 0.03527277
+## 7 0.01005920      6 0.5184680 0.5643923 0.03596314
+## 8 0.01000000      7 0.5084088 0.5844896 0.03752183
 ## 
 ## Variable importance
 ##      Sex   Pclass     Fare      Age    Parch    SibSp Embarked 
@@ -276,7 +275,7 @@ summary(fit)
 ##   mean=1.454545, MSE=0.2479339
 ```
 
-### 4. Random Forests
+### 4. Creating random forests
 
 Constructing a multitude of decision trees at training time. Random decision forests correct for decision trees' habit of overfitting to their training set.
 
@@ -317,11 +316,11 @@ print(fit)
 ##                      Number of trees: 500
 ## No. of variables tried at each split: 2
 ## 
-##         OOB estimate of  error rate: 18.77%
+##         OOB estimate of  error rate: 18.91%
 ## Confusion matrix:
 ##     0   1 class.error
-## 0 381  43   0.1014151
-## 1  91 199   0.3137931
+## 0 378  46   0.1084906
+## 1  89 201   0.3068966
 ```
 
 ```r
@@ -330,13 +329,13 @@ importance(fit)
 
 ```
 ##          MeanDecreaseGini
-## Pclass          30.586451
-## Sex             81.633283
-## Age             49.856105
-## SibSp           12.731067
-## Parch           10.816227
-## Fare            55.041438
-## Embarked         8.335107
+## Pclass          30.459665
+## Sex             83.130594
+## Age             51.121243
+## SibSp           12.615861
+## Parch           10.414987
+## Fare            53.912920
+## Embarked         8.205936
 ```
 
 

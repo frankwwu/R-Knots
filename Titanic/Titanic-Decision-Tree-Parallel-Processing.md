@@ -2,29 +2,28 @@
 
 ### Variable Descriptions
 
-**survival**:  Survival (0 = No; 1 = Yes) 
+**Survival**:  Survival (0 = No; 1 = Yes) 
 
-**pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
+**Pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
 
-**name**:      Name 
+**Name**:      Name 
 
-**sex**:       Sex 
+**Sex**:       Sex 
 
-**age**:       Age 
+**Age**:       Age 
 
-**sibsp**:     Number of Siblings/Spouses Aboard 
+**Sibsp**:     Number of Siblings/Spouses Aboard 
 
-**parch**:     Number of Parents/Children Aboard 
+**Parch**:     Number of Parents/Children Aboard 
 
-**ticket**:    Ticket Number 
+**Ticket**:    Ticket Number 
 
-**fare**:      Passenger Fare 
+**Fare**:      Passenger Fare 
 
-**cabin**:     Cabin 
+**Cabin**:     Cabin 
 
-**embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
+**Embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
  
-
 
 ```r
 library(doParallel)
@@ -50,9 +49,9 @@ test <- read.csv(text = url)
 
 
 ```r
-train<-train[, !(colnames(train) %in% c('name'))]
+train<-train[, !(colnames(train) %in% c('Name', 'Ticket', 'Cabin'))]
 train <-train %>% na.omit()
-test<-test[, !(colnames(test) %in% c('name'))]
+test<-test[, !(colnames(test) %in% c('Name', 'Ticket', 'Cabin'))]
 test <- test %>% na.omit()
 ```
 
@@ -68,7 +67,7 @@ formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
 
 
 ```r
-set.seed(2020)
+set.seed(1212)
 cluster <- makeCluster(detectCores() - 1)
 registerDoParallel(cluster)
 # The number of resampling iterations is 3.
@@ -122,8 +121,8 @@ confusionMatrix.train(fit)
 ##  
 ##           Reference
 ## Prediction    0    1
-##          0 54.3 13.4
-##          1  5.0 27.2
+##          0 53.8 13.0
+##          1  5.6 27.6
 ```
 
 ```r
@@ -134,18 +133,18 @@ fit
 ## Random Forest 
 ## 
 ## 714 samples
-##  11 predictor
+##   8 predictor
 ##   2 classes: '0', '1' 
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (3 fold) 
-## Summary of sample sizes: 476, 476, 476 
+## Summary of sample sizes: 475, 476, 477 
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD  
-##   2     0.8151261  0.6033409  0.02755226   0.06445274
-##   5     0.8039216  0.5892368  0.01057400   0.02573612
-##   9     0.7843137  0.5479448  0.01698089   0.04920397
+##   2     0.8136998  0.6022486  0.009489739  0.02159738
+##   5     0.8066733  0.5945883  0.017619175  0.03998864
+##   9     0.7954394  0.5748321  0.032216607  0.06396532
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 2.
@@ -178,10 +177,10 @@ Survived
 ##  [36] 0 1 1 0 0 1 1 0 0 1 1 0 0 0 1 0 0 0 1 1 1 0 0 1 1 0 0 0 1 0 1 0 1 1 0
 ##  [71] 0 1 0 1 0 1 0 0 1 0 0 0 1 0 0 1 0 0 0 0 1 1 1 0 1 1 1 1 1 0 1 0 0 0 0
 ## [106] 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 1 0 0 1 0 0 1 1 1 0 0 0 0 0 0 0 0 1 1
-## [141] 1 1 1 0 1 1 1 0 1 0 0 0 0 0 1 0 1 0 0 1 1 1 0 0 0 1 0 0 0 1 0 0 0 1 1
-## [176] 0 1 0 1 0 0 0 0 1 0 1 0 0 0 1 1 1 1 0 0 1 0 1 1 0 1 0 0 0 1 0 0 0 1 1
+## [141] 1 1 1 0 1 1 1 0 1 0 0 0 0 0 1 0 1 0 0 1 0 1 0 0 0 1 0 0 0 1 0 0 0 1 1
+## [176] 0 1 0 1 0 0 0 0 1 0 1 0 1 0 1 1 1 1 0 0 1 0 1 1 0 0 0 0 0 1 0 0 0 1 1
 ## [211] 0 0 0 1 1 0 0 0 0 0 1 0 1 0 0 0 0 0 0 1 0 0 0 0 0 1 1 1 0 0 0 0 0 1 1
-## [246] 1 0 0 0 0 0 0 0 1 0 1 0 0 0 1 0 1 0 0 0 0 0 0 0 1 1 0 1 0 1 1 0 0 0 1
+## [246] 0 0 0 0 0 0 0 0 1 0 1 0 0 0 1 0 1 0 0 0 0 0 0 0 1 1 0 1 0 1 1 0 0 0 1
 ## [281] 0 1 0 0 1 1 0 1 0 1 0 0 1 0 0 1 1 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 1 0
 ## [316] 1 0 0 1 0 1 0 0 0 0 0 1 1 0 1 0
 ## Levels: 0 1

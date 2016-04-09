@@ -7,29 +7,28 @@ output:
 
 ### Variable Descriptions
 
-**survival**:  Survival (0 = No; 1 = Yes) 
+**Survival**:  Survival (0 = No; 1 = Yes) 
 
-**pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
+**Pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
 
-**name**:      Name 
+**Name**:      Name 
 
-**sex**:       Sex 
+**Sex**:       Sex 
 
-**age**:       Age 
+**Age**:       Age 
 
-**sibsp**:     Number of Siblings/Spouses Aboard 
+**Sibsp**:     Number of Siblings/Spouses Aboard 
 
-**parch**:     Number of Parents/Children Aboard 
+**Parch**:     Number of Parents/Children Aboard 
 
-**ticket**:    Ticket Number 
+**Ticket**:    Ticket Number 
 
-**fare**:      Passenger Fare 
+**Fare**:      Passenger Fare 
 
-**cabin**:     Cabin 
+**Cabin**:     Cabin 
 
-**embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
+**Embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
  
-
 ```{r warning=FALSE, message=FALSE}
 library(doParallel)
 library(caret)
@@ -52,9 +51,9 @@ test <- read.csv(text = url)
 ### 2. Removing names and NAs.
 
 ```{r}
-train<-train[, !(colnames(train) %in% c('name'))]
+train<-train[, !(colnames(train) %in% c('Name', 'Ticket', 'Cabin'))]
 train <-train %>% na.omit()
-test<-test[, !(colnames(test) %in% c('name'))]
+test<-test[, !(colnames(test) %in% c('Name', 'Ticket', 'Cabin'))]
 test <- test %>% na.omit()
 ```
 
@@ -68,7 +67,7 @@ formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
 ### 4. Random Forest training model with parallel processing
 
 ```{r}
-set.seed(2020)
+set.seed(1212)
 cluster <- makeCluster(detectCores() - 1)
 registerDoParallel(cluster)
 # The number of resampling iterations is 3.
