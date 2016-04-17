@@ -1,16 +1,36 @@
-    library(ggplot2)
-    uri <- "http://ichart.finance.yahoo.com/table.csv?s=AAPL&a=0&b=2&c=2010&d=0&e=2&f=2020&g=m"
-    df <- read.csv(uri)
+# Yahoo Quote
 
-    #convert the 'Date' from a string to a Date type
-    df$Date <- as.Date(df$Date, "%Y-%m-%d")
 
-    fit <- lm(df$Date ~ df$Adj.Close, data = df)
+```r
+library(lubridate)
+library(ggplot2)
+```
 
-    ggplot(fit$model, aes_string(x = names(fit$model)[1], y = names(fit$model)[2])) +
-      geom_point() + 
-      labs(x="Year",y="$") + 
-      ggtitle("AAPL") +
-      stat_smooth(method = "loess", col = "red")
 
-![](Yahoo_Quote_files/figure-markdown_strict/unnamed-chunk-1-1.png)
+```r
+uri <- "http://ichart.finance.yahoo.com/table.csv?s=AAPL&a=0&b=2&c=2010&d=0&e=2&f=2020&g=d"
+df <- read.csv(uri)
+
+#convert the 'Date' from a string to a Date type
+df$Date <- as.Date(df$Date, "%Y-%m-%d")
+
+fit <- lm(df$Date ~ df$Adj.Close, data = df)
+
+ggplot(fit$model, aes_string(x = names(fit$model)[1], y = names(fit$model)[2])) +
+  geom_point(color = 'blue', alpha = 0.2) + 
+  labs(x="Year",y="Adjusted Close Price $") + 
+  ggtitle("AAPL") +
+  stat_smooth(method = "loess", col = "red")
+```
+
+![](Yahoo_Quote_files/figure-html/unnamed-chunk-2-1.png)
+
+```r
+df$Year <- year(df$Date)
+ggplot(data=df, aes(x=as.POSIXlt(Date, format="%d-%m-%Y")$yday, y=Adj.Close)) +
+  geom_point(color = df$Year, alpha = 0.5) + 
+  labs(x="Day in Year",y="Adjusted Close Price $") + 
+  ggtitle("AAPL")
+```
+
+![](Yahoo_Quote_files/figure-html/unnamed-chunk-2-2.png)
