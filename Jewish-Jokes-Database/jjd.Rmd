@@ -1,23 +1,28 @@
 ---
-title: "JJD"
-output: html_document
+title: "Creating Jewish Jokes Database"
+output: 
+  html_document: 
+    keep_md: yes
 ---
 
-
-```{r}
+```{r warning=FALSE, message=FALSE}
 require(RCurl)
 require(XML)
+```
+
+```{r}
 baseUrl<-"http://www.awordinyoureye.com/"
 webpage <- getURL(baseUrl)
 webpage <- readLines(tc <- textConnection(webpage)); 
 close(tc)
 
 mainPage <- htmlTreeParse(webpage, error=function(...){}, useInternalNodes = TRUE)
-#links = xpathApply(mainPage, "//a[@href]", xmlGetAttr, "href")
-#links
-
 links = xpathApply(mainPage, "//a[@href]", xmlGetAttr, "href")
 links<-grep("joke", links, value = TRUE)
+
+filename <- "c:/temp/Jewish-jokes.txt"
+if (file.exists(filename)) file.remove(filename)
+
 for (i in 1:length(links) ) {
   url<-paste(baseUrl ,links[i], sep='')
   webpage <- getURL(url)
@@ -33,13 +38,7 @@ for (i in 1:length(links) ) {
   text<-text[text != " \r"]
   #gsub("[\\"]", "\"", text)
   #text
-  path<-paste(c("c:/temp/joke", i), collapse = "-")
-  file<-paste(c(path, ".txt"), collapse = "")
-  fileConn<-file(file)
-  writeLines(text, fileConn)
-  close(fileConn)
+  write(text, file=filename, append=TRUE)
 }
-
-
 ```
 

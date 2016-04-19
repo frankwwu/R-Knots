@@ -1,0 +1,47 @@
+# Creating Jewish Jokes Database
+
+
+```r
+require(RCurl)
+require(XML)
+```
+
+
+```r
+baseUrl<-"http://www.awordinyoureye.com/"
+webpage <- getURL(baseUrl)
+webpage <- readLines(tc <- textConnection(webpage)); 
+close(tc)
+
+mainPage <- htmlTreeParse(webpage, error=function(...){}, useInternalNodes = TRUE)
+links = xpathApply(mainPage, "//a[@href]", xmlGetAttr, "href")
+links<-grep("joke", links, value = TRUE)
+
+filename <- "c:/temp/Jewish-jokes.txt"
+if (file.exists(filename)) file.remove(filename)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+for (i in 1:length(links) ) {
+  url<-paste(baseUrl ,links[i], sep='')
+  webpage <- getURL(url)
+  webpage <- readLines(tc <- textConnection(webpage)); 
+  close(tc)
+  doc <- htmlParse(webpage, error=function(...){}, useInternalNodes = TRUE)
+  plain.text <- xpathSApply(doc, "//text()[not(ancestor::script)][not(ancestor::style)][not(ancestor::noscript)][not(ancestor::form)]", xmlValue)
+  text<-paste(plain.text, collapse = "\n")
+  text<-strsplit(text, "\n")
+  text<-text[[1]][(text[[1]] != "\r")]
+  text<-text[text != ""]
+  text<-text[text != " "]
+  text<-text[text != " \r"]
+  #gsub("[\\"]", "\"", text)
+  #text
+  write(text, file=filename, append=TRUE)
+}
+```
+
