@@ -60,13 +60,13 @@ Since temp and atemp are highly correlated, we can remove one of them from the t
 ```{r}
 train<-train[, !(colnames(train) %in% c('atemp'))]
 time <- factor(substring(train$datetime, 12, 20))
-train$hour<- as.numeric(substr(time, 1, 2))
+train$hour<- factor(as.numeric(substr(time, 1, 2)))
 train$month <- factor(substring(as.Date(train$datetime), 6, 7))
 train$workingday <- factor(train$workingday)
 
 test<-test[, !(colnames(test) %in% c('atemp'))] 
 time <- factor(substring(test$datetime, 12, 20))
-test$hour<- as.numeric(substr(time, 1, 2))
+test$hour<- factor(as.numeric(substr(time, 1, 2)))
 test$month <- factor(substring(as.Date(test$datetime), 6, 7))
 test$workingday <- factor(test$workingday)
 ```
