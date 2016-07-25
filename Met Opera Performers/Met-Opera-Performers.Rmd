@@ -1,0 +1,132 @@
+---
+title: "Met Opera Performers"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r warning=FALSE, message=FALSE}
+library(rvest)
+library(dplyr)
+library(foreach)
+library(ggplot2)
+```
+
+###Read data
+
+```{r warning=FALSE}
+performers<- read_html("https://en.wikipedia.org/wiki/List_of_performers_at_the_Metropolitan_Opera")
+names<-performers%>% html_nodes("td") %>% html_nodes("a")%>% html_text()
+performers<-performers %>%
+html_nodes(xpath='//*[@id="mw-content-text"]/table[1]') %>%
+html_table()
+performers<-performers[[1]]
+```
+
+###Data cleaning
+
+Clean and unicode encode names.
+
+Clean categories
+
+```{r warning=FALSE}
+# Clean names
+rows<-nrow(performers)
+len<-length(names)
+for(i in 1:rows)
+{
+  for(j in 1:len)
+  {
+    if(length(grep(names[j], performers[i,]$Performer))>0)
+    {
+      Encoding(names[j]) <- "UTF-8"
+      performers[i,]$Performer<-names[j]
+      break
+    }
+  }
+}
+
+# Clean categories
+performers[performers$Category=="Bass-baritone",]$Category<-"Bass-Baritone"
+performers[performers$Category=="Mezzo-soprano",]$Category<-"Mezzo-Soprano"
+performers[performers$Category=="Mezzo Soprano",]$Category<-"Mezzo-Soprano"
+performers[performers$Category=="Mezzo-soprano, Soprano",]$Category<-"Soprano, Mezzo-soprano"
+```
+
+###Calculate longevity
+
+```{r warning=FALSE}
+performers$"First performance" <- as.Date(performers$"First performance", "%m/%d/%Y")
+performers$"Last performance" <- as.Date(performers$"Last performance", "%m/%d/%Y")
+performers <- mutate(performers, Longevity = round(((performers$"Last performance" - performers$"First performance")/365), digits=1))
+```
+
+###Maximum display 25 performers in a plot
+
+```{r warning=FALSE}
+cats<-unique(performers$Category)
+count<-length(cats)
+top=25
+```
+
+###Ranking by Longevity
+
+```{r warning=FALSE}
+foreach(i = 1:count) %do%
+{
+  cat_performers<-performers[performers$Category==cats[i],]
+  cat_performers$Performer<-factor(cat_performers$Performer, levels=cat_performers[order(cat_performers$Longevity), "Performer"])
+  
+  if(dim(cat_performers)[1] > top)
+  {
+    cat_performers<-cat_performers[1:top,]
+  }
+  
+  ggplot(data=cat_performers, aes(x=Performer, y=Longevity, fill=Longevity)) + 
+    geom_bar(stat="identity") +
+    geom_text(data=cat_performers, aes(label=Longevity), size=3, y = cat_performers$Longevity/2, color="white") +
+    coord_flip() +
+    ggtitle(cats[i]) +
+    theme(legend.position="none") + 
+    labs(y="Longevity (year)") +
+    scale_fill_gradient("Count", low="navy", high="firebrick1")
+}
+```
+
+###Ranking by Performance
+
+```{r warning=FALSE}
+foreach(i = 1:count) %do%
+{
+  cat_performers<-performers[performers$Category==cats[i],]
+  cat_performers$Performer<-factor(cat_performers$Performer, levels=cat_performers[order(cat_performers$Performances), "Performer"])
+  
+  if(dim(cat_performers)[1] > top)
+  {
+    cat_performers<-cat_performers[1:top,]
+  }
+  
+  ggplot(data=cat_performers, aes(x=Performer, y=Performances, fill=Performances)) + 
+    geom_bar(stat="identity") +
+    geom_text(data=cat_performers, aes(label=Performances), size=3, y = cat_performers$Performances/2, color="white") +
+    coord_flip() +
+    ggtitle(cats[i]) +
+    theme(legend.position="none") +
+    scale_fill_gradient("Count", low="darkgreen", high="firebrick1")
+}
+```
+
+###Summary of Longevity
+
+```{r warning=FALSE}
+groupByCategory <- group_by(performers, Category)
+Performances<-summarise(groupByCategory, Count=n(), MinPerformances=min(Performances), MaxPerformances=max(Performances))
+Performances
+```
+
+###Summary of Performance
+
+```{r warning=FALSE}
+Longevities<-summarise(groupByCategory, Count=n(), MinLongevity=min(Longevity), MaxLongevity=max(Longevity))
+Longevities
+```
