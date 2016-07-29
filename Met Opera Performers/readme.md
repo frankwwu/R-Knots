@@ -6,9 +6,10 @@ library(rvest)
 library(dplyr)
 library(foreach)
 library(ggplot2)
+library(pastecs)
 ```
 
-###Read data
+###Read Data
 
 
 ```r
@@ -20,7 +21,7 @@ html_table()
 performers<-performers[[1]]
 ```
 
-###Data cleaning
+###Data Cleaning
 
 Clean and unicode encode names.
 
@@ -51,16 +52,16 @@ performers[performers$Category=="Mezzo Soprano",]$Category<-"Mezzo-Soprano"
 performers[performers$Category=="Mezzo-soprano, Soprano",]$Category<-"Soprano, Mezzo-soprano"
 ```
 
-###Calculate longevity
+###Calculate Longevity
 
 
 ```r
 performers$"First performance" <- as.Date(performers$"First performance", "%m/%d/%Y")
 performers$"Last performance" <- as.Date(performers$"Last performance", "%m/%d/%Y")
-performers <- mutate(performers, Longevity = round(((performers$"Last performance" - performers$"First performance")/365), digits=1))
+performers <- mutate(performers, Longevity = round(daystoyears(unclass(performers$"Last performance")) - daystoyears(unclass(performers$"First performance")), digits=1))
 ```
 
-###Maximum display 25 performers in a plot
+###Maximum Display 25 Performers in a Plot
 
 
 ```r
@@ -89,18 +90,12 @@ foreach(i = 1:count) %do%
     coord_flip() +
     ggtitle(cats[i]) +
     theme(legend.position="none") + 
-    labs(y="Longevity (year)") +
-    scale_fill_gradient("Count", low="navy", high="firebrick1")
+    labs(y="Longevity (year)")
 }
 ```
 
 ```
 ## [[1]]
-```
-
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
 ```
 
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
@@ -110,21 +105,11 @@ foreach(i = 1:count) %do%
 ## [[2]]
 ```
 
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-```
-
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-2.png)<!-- -->
 
 ```
 ## 
 ## [[3]]
-```
-
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
 ```
 
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-3.png)<!-- -->
@@ -134,21 +119,11 @@ foreach(i = 1:count) %do%
 ## [[4]]
 ```
 
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-```
-
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-4.png)<!-- -->
 
 ```
 ## 
 ## [[5]]
-```
-
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
 ```
 
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-5.png)<!-- -->
@@ -158,21 +133,11 @@ foreach(i = 1:count) %do%
 ## [[6]]
 ```
 
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-```
-
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-6.png)<!-- -->
 
 ```
 ## 
 ## [[7]]
-```
-
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
 ```
 
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-7.png)<!-- -->
@@ -182,11 +147,6 @@ foreach(i = 1:count) %do%
 ## [[8]]
 ```
 
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-```
-
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-8.png)<!-- -->
 
 ```
@@ -194,21 +154,11 @@ foreach(i = 1:count) %do%
 ## [[9]]
 ```
 
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-```
-
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-9.png)<!-- -->
 
 ```
 ## 
 ## [[10]]
-```
-
-```
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
-## Don't know how to automatically pick scale for object of type difftime. Defaulting to continuous.
 ```
 
 ![](Met-Opera-Performers_files/figure-html/unnamed-chunk-6-10.png)<!-- -->
@@ -232,8 +182,7 @@ foreach(i = 1:count) %do%
     geom_text(data=cat_performers, aes(label=Performances), size=3, y = cat_performers$Performances/2, color="white") +
     coord_flip() +
     ggtitle(cats[i]) +
-    theme(legend.position="none") +
-    scale_fill_gradient("Count", low="darkgreen", high="firebrick1")
+    theme(legend.position="none")
 }
 ```
 
@@ -341,16 +290,16 @@ Longevities
 
 ```
 ## # A tibble: 10 x 4
-##                  Category Count   MinLongevity   MaxLongevity
-##                     <chr> <int> <S3: difftime> <S3: difftime>
-## 1                Baritone    59       4.2 days      44.1 days
-## 2                    Bass    59       5.4 days      44.7 days
-## 3           Bass-Baritone     5      11.3 days      35.2 days
-## 4               Conductor    32       3.4 days      52.3 days
-## 5               Contralto     1      24.2 days      24.2 days
-## 6                  Dancer    19       3.4 days      31.8 days
-## 7           Mezzo-Soprano    56       5.4 days      42.7 days
-## 8                 Soprano    64       5.5 days      40.2 days
-## 9  Soprano, Mezzo-soprano     3      14.3 days      38.9 days
-## 10                  Tenor    74       3.4 days      55.9 days
+##                  Category Count MinLongevity MaxLongevity
+##                     <chr> <int>        <dbl>        <dbl>
+## 1                Baritone    59          4.2         44.0
+## 2                    Bass    59          5.4         44.7
+## 3           Bass-Baritone     5         11.3         35.2
+## 4               Conductor    32          3.4         52.2
+## 5               Contralto     1         24.2         24.2
+## 6                  Dancer    19          3.4         31.8
+## 7           Mezzo-Soprano    56          5.4         42.7
+## 8                 Soprano    64          5.5         40.2
+## 9  Soprano, Mezzo-soprano     3         14.3         38.9
+## 10                  Tenor    74          3.4         55.9
 ```
