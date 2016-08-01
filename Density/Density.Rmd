@@ -1,15 +1,32 @@
 ---
-title: "ggplot2: geom_violin vs. geom_boxplot vs. geom_density"
-output: word_document
+title: 'Density'
+output: 
+  html_document: 
+    keep_md: yes
 ---
 
 ```{r}
 library(datasets)
 library(ggplot2)
+library(gridExtra)
+```
 
-summary(ToothGrowth)
+###geom_boxplot
 
-ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=dose)) +
+```{r}
+ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=as.factor(dose))) +
+    geom_boxplot() +   
+    facet_grid(. ~ supp) +   
+    xlab("Dose (mg)") +
+    ylab("Tooth length (mm)") +
+    guides(fill=guide_legend(title="Dose")) + 
+    ggtitle("Correlation of Tooth Length, \nDose, and Supplement Type")
+```
+
+###geom_violin
+
+```{r}
+ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=as.factor(dose))) +
     geom_violin() +   
     facet_grid(. ~ supp) +   
     xlab("Dose (mg)") +
@@ -17,15 +34,19 @@ ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=dose)) +
     guides(fill=guide_legend(title="Dose")) + 
     ggtitle("Correlation of Tooth Length, \nDose, and Supplement Type")
 
-ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=dose)) +
-    geom_boxplot() +   
+ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=as.factor(dose))) +
+    geom_violin(adjust = .5) +   
     facet_grid(. ~ supp) +   
     xlab("Dose (mg)") +
     ylab("Tooth length (mm)") +
     guides(fill=guide_legend(title="Dose")) + 
     ggtitle("Correlation of Tooth Length, \nDose, and Supplement Type")
+```
 
-ggplot(ToothGrowth,aes(x=len, fill=dose)) +
+###geom_density
+
+```{r}
+ggplot(ToothGrowth,aes(x=len, fill=as.factor(dose))) +
     geom_density() + 
     facet_grid(dose~supp) +
     xlab("Tooth length (mm)") +
@@ -34,4 +55,30 @@ ggplot(ToothGrowth,aes(x=len, fill=dose)) +
     ggtitle("Correlation of Tooth Length, \nDose, and Supplement Type") + 
     coord_flip()
 
+ggplot(ToothGrowth,aes(x=len, fill=as.factor(dose))) +
+    geom_density(adjust = .5) + 
+    facet_grid(dose~supp) +
+    xlab("Tooth length (mm)") +
+    ylab("Density") +
+    guides(fill=guide_legend(title="Dose", reverse=TRUE)) + 
+    ggtitle("Correlation of Tooth Length, \nDose, and Supplement Type") + 
+    coord_flip()
+
+```
+
+###gridExtra
+
+```{r warning=FALSE, message=FALSE}
+p <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) + 
+    geom_point(aes(alpha = 0.3)) + 
+    ggtitle("Correlation of displ and hwy") + 
+    theme(legend.position="none")
+
+ggExtra::ggMarginal(p)
+
+ggExtra::ggMarginal(p, type = "histogram")
+
+ggExtra::ggMarginal(p, type = "histogram", size = 2, col = "darkorange4", fill = "gold")
+
+ggExtra::ggMarginal(p, type = "boxplot", col = "navy", fill = "lightslateblue")
 ```
