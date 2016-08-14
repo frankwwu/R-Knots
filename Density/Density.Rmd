@@ -70,8 +70,8 @@ ggplot(ToothGrowth,aes(x=len, fill=as.factor(dose))) +
 
 ```{r warning=FALSE, message=FALSE}
 p <- ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, colour = Species)) + 
-    geom_point(aes(alpha = 0.3)) + 
-    ggtitle("Correlation of displ and hwy") + 
+    geom_point(aes(alpha = 0.5)) + 
+    ggtitle("Correlation of Sepal Length and Width") + 
     theme(legend.position="none")
 
 ggExtra::ggMarginal(p)
