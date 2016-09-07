@@ -24,7 +24,7 @@ html_table()
 performers<-performers[[1]]
 ```
 
-###Data Cleaning
+###Clean Data
 
 Clean and unicode encode names.
 
@@ -40,6 +40,7 @@ for(i in 1:rows)
   {
     if(length(grep(names[j], performers[i,]$Performer))>0)
     {
+      # Unicode encode
       Encoding(names[j]) <- "UTF-8"
       performers[i,]$Performer<-names[j]
       break
@@ -49,9 +50,9 @@ for(i in 1:rows)
 
 # Clean categories
 performers[performers$Category=="Bass-baritone",]$Category<-"Bass-Baritone"
-performers[performers$Category=="Mezzo-soprano",]$Category<-"Mezzo-Soprano"
-performers[performers$Category=="Mezzo Soprano",]$Category<-"Mezzo-Soprano"
 performers[performers$Category=="Mezzo-soprano, Soprano",]$Category<-"Soprano, Mezzo-soprano"
+#performers[performers$Category=="Mezzo-soprano",]$Category<-"Mezzo-Soprano"
+#performers[performers$Category=="Mezzo Soprano",]$Category<-"Mezzo-Soprano"
 ```
 
 ###Calculate Longevity
@@ -62,10 +63,17 @@ performers$"Last performance" <- as.Date(performers$"Last performance", "%m/%d/%
 performers <- mutate(performers, Longevity = round(daystoyears(unclass(performers$"Last performance")) - daystoyears(unclass(performers$"First performance")), digits=1))
 ```
 
+###Calculate Performance per Year
+
+```{r warning=FALSE}
+performers$Performance.Per.Year <- round(performers$Performance/performers$Longevity, digits = 1)
+```
+
 ###Maximum Display 25 Performers in a Plot
 
 ```{r warning=FALSE}
 cats<-unique(performers$Category)
+cats
 count<-length(cats)
 top=25
 ```
@@ -87,7 +95,7 @@ foreach(i = 1:count) %do%
     geom_bar(stat="identity") +
     geom_text(data=cat_performers, aes(label=Longevity), size=3, y = cat_performers$Longevity/2, color="white") +
     coord_flip() +
-    ggtitle(cats[i]) +
+    ggtitle(paste(cats[i], "Ranking by Longevity", sep=" ")) +
     theme(legend.position="none") + 
     labs(y="Longevity (year)")
 }
@@ -110,8 +118,31 @@ foreach(i = 1:count) %do%
     geom_bar(stat="identity") +
     geom_text(data=cat_performers, aes(label=Performances), size=3, y = cat_performers$Performances/2, color="white") +
     coord_flip() +
-    ggtitle(cats[i]) +
+    ggtitle(paste(cats[i], "Ranking by Performance", sep=" ")) +
     theme(legend.position="none")
+}
+```
+
+###Ranking by Average Performance per Year
+
+```{r warning=FALSE}
+foreach(i = 1:count) %do%
+{
+  cat_performers<-performers[performers$Category==cats[i],]
+  cat_performers$Performer<-factor(cat_performers$Performer, levels=cat_performers[order(cat_performers$Performance.Per.Year), "Performer"])
+  
+  if(dim(cat_performers)[1] > top)
+  {
+    cat_performers<-cat_performers[1:top,]
+  }
+  
+  ggplot(data=cat_performers, aes(x=Performer, y=Performance.Per.Year, fill=Performance.Per.Year)) + 
+    geom_bar(stat="identity") +
+    geom_text(data=cat_performers, aes(label=Performance.Per.Year), size=3, y = cat_performers$Performance.Per.Year/2, color="white") +
+    coord_flip() +
+    ggtitle(paste(cats[i], "Ranking by Average Performance per Year", sep=" ")) +
+    theme(legend.position="none") + 
+    labs(y="Average Performance per Year")
 }
 ```
 
@@ -119,13 +150,17 @@ foreach(i = 1:count) %do%
 
 ```{r warning=FALSE}
 groupByCategory <- group_by(performers, Category)
-Performances<-summarise(groupByCategory, Count=n(), MinPerformances=min(Performances), MaxPerformances=max(Performances))
-Performances
+summarise(groupByCategory, Count=n(), MinPerformances=min(Performances), MaxPerformances=max(Performances))
 ```
 
 ###Summary of Performance
 
 ```{r warning=FALSE}
-Longevities<-summarise(groupByCategory, Count=n(), MinLongevity=min(Longevity), MaxLongevity=max(Longevity))
-Longevities
+summarise(groupByCategory, Count=n(), MinLongevity=min(Longevity), MaxLongevity=max(Longevity))
+```
+
+###Summary of Average Performance per Year
+
+```{r warning=FALSE}
+summarise(groupByCategory, Count=n(), MinLongevity=min(Performance.Per.Year), MaxLongevity=max(Performance.Per.Year))
 ```
