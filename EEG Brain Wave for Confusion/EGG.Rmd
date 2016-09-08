@@ -1,0 +1,72 @@
+---
+title: "EGG Brain Wave for Confusion"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r warning=FALSE, message=FALSE}
+library(RCurl)
+library(corrplot)
+library(ggbiplot)
+```
+
+## Source
+
+https://www.kaggle.com/wanghaohan/eeg-brain-wave-for-confusion
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/EEG-data.csv')
+df <- read.csv(text = url) 
+dim(df)
+str(df)
+unique(df$subject.ID)
+unique(df$predefined.label)
+unique(df$Self.defined.label)
+
+```
+
+##Data Exploration
+
+Lower triangular of the correlogram
+
+```{r}
+correlation<-cor(df)
+corrplot(correlation, type="lower")
+```
+
+Positive correlations are displayed in blue and negative correlations in red color. Color intensity and the size of the circle are proportional to the correlation coefficients.
+
+Add significance level to the correlogram
+
+```{r}
+cor.mtest <- function(mat, ...) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], ...)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+corrplot(correlation, type="lower", p.mat = cor.mtest(df), sig.level = 0.01)
+```
+
+In the above figure, correlations with p-value > 0.01 are considered as insignificant. In this case the correlation coefficient values are leaved blank or crosses are added.
+
+##PCA
+
+```{r}
+pca <- prcomp(df, center = TRUE, scale. = TRUE) 
+print(pca)
+plot(pca, type = "l")
+summary(pca)
+
+ggbiplot(pca, obs.scale = 1, var.scale = 1, ellipse = TRUE, circle = TRUE, alpha = 0.1)
+```
+
