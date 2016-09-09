@@ -162,5 +162,5 @@ summarise(groupByCategory, Count=n(), MinLongevity=min(Longevity), MaxLongevity=
 ###Summary of Average Performance per Year
 
 ```{r warning=FALSE}
-summarise(groupByCategory, Count=n(), MinLongevity=min(Performance.Per.Year), MaxLongevity=max(Performance.Per.Year))
+summarise(groupByCategory, Count=n(), MinAvePerfPerYear=min(Performance.Per.Year), MaxAvePerfPerYear=max(Performance.Per.Year))
 ```

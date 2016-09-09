@@ -369,20 +369,20 @@ summarise(groupByCategory, Count=n(), MinPerformances=min(Performances), MaxPerf
 </div>
 <div id="summary-of-average-performance-per-year" class="section level3">
 <h3>Summary of Average Performance per Year</h3>
-<pre class="r"><code>summarise(groupByCategory, Count=n(), MinLongevity=min(Performance.Per.Year), MaxLongevity=max(Performance.Per.Year))</code></pre>
+<pre class="r"><code>summarise(groupByCategory, Count=n(), MinAvePerfPerYear=min(Performance.Per.Year), MaxAvePerfPerYear=max(Performance.Per.Year))</code></pre>
 <pre><code>## # A tibble: 10 x 4
-##                  Category Count MinLongevity MaxLongevity
-##                     &lt;chr&gt; &lt;int&gt;        &lt;dbl&gt;        &lt;dbl&gt;
-## 1                Baritone    59          7.2         80.9
-## 2                    Bass    59          6.0         62.1
-## 3           Bass-Baritone     5         13.0         53.6
-## 4               Conductor    32          6.2         87.4
-## 5               Contralto     1         12.0         12.0
-## 6                  Dancer    19          8.0         74.7
-## 7           Mezzo-soprano    56          7.5         48.0
-## 8                 Soprano    64          6.4         74.3
-## 9  Soprano, Mezzo-soprano     3          8.4         31.5
-## 10                  Tenor    74          6.4         82.3</code></pre>
+##                  Category Count MinAvePerfPerYear MaxAvePerfPerYear
+##                     &lt;chr&gt; &lt;int&gt;             &lt;dbl&gt;             &lt;dbl&gt;
+## 1                Baritone    59               7.2              80.9
+## 2                    Bass    59               6.0              62.1
+## 3           Bass-Baritone     5              13.0              53.6
+## 4               Conductor    32               6.2              87.4
+## 5               Contralto     1              12.0              12.0
+## 6                  Dancer    19               8.0              74.7
+## 7           Mezzo-soprano    56               7.5              48.0
+## 8                 Soprano    64               6.4              74.3
+## 9  Soprano, Mezzo-soprano     3               8.4              31.5
+## 10                  Tenor    74               6.4              82.3</code></pre>
 </div>
 
 
