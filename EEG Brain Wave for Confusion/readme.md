@@ -1,29 +1,29 @@
 # EGG Brain Wave for Confusion
 
-
-```r
-library(RCurl)
-library(corrplot)
-library(ggbiplot)
-```
-
-## Source
+### Source
 
 https://www.kaggle.com/wanghaohan/eeg-brain-wave-for-confusion
 
 
 ```r
-url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/EEG-data.csv')
-df <- read.csv(text = url) 
-dim(df)
+library(RCurl)
+library(corrplot)
+library(ggfortify)
 ```
 
-```
-## [1] 12811    15
-```
+###Read Data
+
 
 ```r
-str(df)
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/EEG-data.csv')
+eeg <- read.csv(text = url) 
+```
+
+###Data Exploration
+
+
+```r
+str(eeg)
 ```
 
 ```
@@ -46,7 +46,7 @@ str(df)
 ```
 
 ```r
-unique(df$subject.ID)
+unique(eeg$subject.ID)
 ```
 
 ```
@@ -54,7 +54,7 @@ unique(df$subject.ID)
 ```
 
 ```r
-unique(df$predefined.label)
+unique(eeg$predefined.label)
 ```
 
 ```
@@ -62,24 +62,20 @@ unique(df$predefined.label)
 ```
 
 ```r
-unique(df$Self.defined.label)
+unique(eeg$Self.defined.label)
 ```
 
 ```
 ## [1] 0 1
 ```
 
-##Data Exploration
-
-Lower triangular of the correlogram
-
-
 ```r
-correlation<-cor(df)
+#Lower triangular of the correlogram
+correlation<-cor(eeg)
 corrplot(correlation, type="lower")
 ```
 
-![](EGG_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![](EEG_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
 Positive correlations are displayed in blue and negative correlations in red color. Color intensity and the size of the circle are proportional to the correlation coefficients.
 
@@ -101,18 +97,18 @@ cor.mtest <- function(mat, ...) {
   colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
   p.mat
 }
-corrplot(correlation, type="lower", p.mat = cor.mtest(df), sig.level = 0.01)
+corrplot(correlation, type="lower", p.mat = cor.mtest(eeg), sig.level = 0.01)
 ```
 
-![](EGG_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![](EEG_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 In the above figure, correlations with p-value > 0.01 are considered as insignificant. In this case the correlation coefficient values are leaved blank or crosses are added.
 
-##PCA
+###PCA
 
 
 ```r
-pca <- prcomp(df, center = TRUE, scale. = TRUE) 
+pca <- prcomp(eeg, center = TRUE, scale. = TRUE) 
 print(pca)
 ```
 
@@ -193,7 +189,7 @@ print(pca)
 plot(pca, type = "l")
 ```
 
-![](EGG_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](EEG_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 ```r
 summary(pca)
@@ -216,8 +212,24 @@ summary(pca)
 ```
 
 ```r
-ggbiplot(pca, obs.scale = 1, var.scale = 1, ellipse = TRUE, circle = TRUE, alpha = 0.1)
+eeg$subject.ID<-as.factor(eeg$subject.ID)
+eeg$predefined.label<-as.factor(eeg$predefined.label)
+eeg$Self.defined.label<-as.factor(eeg$Self.defined.label)
+
+autoplot(pca, data =eeg, colour ='Self.defined.label', alpha=I(0.4))
 ```
 
-![](EGG_files/figure-html/unnamed-chunk-5-2.png)<!-- -->
+![](EEG_files/figure-html/unnamed-chunk-5-2.png)<!-- -->
+
+```r
+autoplot(pca, data =eeg, colour ='predefined.label', alpha=I(0.4), loadings = TRUE, loadings.label = TRUE, loadings.colour = 'blue4', loadings.label.colour = 'darkgreen')
+```
+
+![](EEG_files/figure-html/unnamed-chunk-5-3.png)<!-- -->
+
+```r
+autoplot(pca, data =eeg, colour ='subject.ID', alpha=I(0.3))
+```
+
+![](EEG_files/figure-html/unnamed-chunk-5-4.png)<!-- -->
 

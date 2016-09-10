@@ -5,33 +5,33 @@ output:
     keep_md: yes
 ---
 
-```{r warning=FALSE, message=FALSE}
-library(RCurl)
-library(corrplot)
-library(ggbiplot)
-```
-
-## Source
+### Source
 
 https://www.kaggle.com/wanghaohan/eeg-brain-wave-for-confusion
 
-```{r}
-url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/EEG-data.csv')
-df <- read.csv(text = url) 
-dim(df)
-str(df)
-unique(df$subject.ID)
-unique(df$predefined.label)
-unique(df$Self.defined.label)
-
+```{r warning=FALSE, message=FALSE}
+library(RCurl)
+library(corrplot)
+library(ggfortify)
 ```
 
-##Data Exploration
-
-Lower triangular of the correlogram
+###Read Data
 
 ```{r}
-correlation<-cor(df)
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/EEG-data.csv')
+eeg <- read.csv(text = url) 
+```
+
+###Data Exploration
+
+```{r}
+str(eeg)
+unique(eeg$subject.ID)
+unique(eeg$predefined.label)
+unique(eeg$Self.defined.label)
+
+#Lower triangular of the correlogram
+correlation<-cor(eeg)
 corrplot(correlation, type="lower")
 ```
 
@@ -54,19 +54,25 @@ cor.mtest <- function(mat, ...) {
   colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
   p.mat
 }
-corrplot(correlation, type="lower", p.mat = cor.mtest(df), sig.level = 0.01)
+corrplot(correlation, type="lower", p.mat = cor.mtest(eeg), sig.level = 0.01)
 ```
 
 In the above figure, correlations with p-value > 0.01 are considered as insignificant. In this case the correlation coefficient values are leaved blank or crosses are added.
 
-##PCA
+###PCA
 
 ```{r}
-pca <- prcomp(df, center = TRUE, scale. = TRUE) 
+pca <- prcomp(eeg, center = TRUE, scale. = TRUE) 
 print(pca)
 plot(pca, type = "l")
 summary(pca)
 
-ggbiplot(pca, obs.scale = 1, var.scale = 1, ellipse = TRUE, circle = TRUE, alpha = 0.1)
+eeg$subject.ID<-as.factor(eeg$subject.ID)
+eeg$predefined.label<-as.factor(eeg$predefined.label)
+eeg$Self.defined.label<-as.factor(eeg$Self.defined.label)
+
+autoplot(pca, data =eeg, colour ='Self.defined.label', alpha=I(0.4))
+autoplot(pca, data =eeg, colour ='predefined.label', alpha=I(0.4), loadings = TRUE, loadings.label = TRUE, loadings.colour = 'blue4', loadings.label.colour = 'darkgreen')
+autoplot(pca, data =eeg, colour ='subject.ID', alpha=I(0.3))
 ```
 
