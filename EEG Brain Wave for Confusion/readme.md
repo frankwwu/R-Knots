@@ -7,6 +7,7 @@ https://www.kaggle.com/wanghaohan/eeg-brain-wave-for-confusion
 
 ```r
 library(RCurl)
+library(knitr)
 library(corrplot)
 library(ggfortify)
 ```
@@ -17,9 +18,14 @@ library(ggfortify)
 ```r
 url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/EEG-data.csv')
 eeg <- read.csv(text = url) 
+
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/demographic-info.csv')
+demography<-read.csv(text = url) 
 ```
 
 ###Data Exploration
+
+####1. EEG Data
 
 
 ```r
@@ -103,6 +109,28 @@ corrplot(correlation, type="lower", p.mat = cor.mtest(eeg), sig.level = 0.01)
 ![](EEG_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 In the above figure, correlations with p-value > 0.01 are considered as insignificant. In this case the correlation coefficient values are leaved blank or crosses are added.
+
+####2. Demographic Info
+
+
+```r
+kable(demography)
+```
+
+
+
+ subject.ID   age  ethnicity     gender 
+-----------  ----  ------------  -------
+          0    25  Han Chinese   M      
+          1    24  Han Chinese   M      
+          2    31  English       M      
+          3    28  Han Chinese   F      
+          4    24  Bengali       M      
+          5    24  Han Chinese   M      
+          6    24  Han Chinese   M      
+          7    25  Han Chinese   M      
+          8    25  Han Chinese   M      
+          9    24  Han Chinese   F      
 
 ###PCA
 
@@ -189,7 +217,7 @@ print(pca)
 plot(pca, type = "l")
 ```
 
-![](EEG_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](EEG_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 ```r
 summary(pca)
@@ -219,17 +247,16 @@ eeg$Self.defined.label<-as.factor(eeg$Self.defined.label)
 autoplot(pca, data =eeg, colour ='Self.defined.label', alpha=I(0.4))
 ```
 
-![](EEG_files/figure-html/unnamed-chunk-5-2.png)<!-- -->
+![](EEG_files/figure-html/unnamed-chunk-6-2.png)<!-- -->
 
 ```r
 autoplot(pca, data =eeg, colour ='predefined.label', alpha=I(0.4), loadings = TRUE, loadings.label = TRUE, loadings.colour = 'blue4', loadings.label.colour = 'darkgreen')
 ```
 
-![](EEG_files/figure-html/unnamed-chunk-5-3.png)<!-- -->
+![](EEG_files/figure-html/unnamed-chunk-6-3.png)<!-- -->
 
 ```r
 autoplot(pca, data =eeg, colour ='subject.ID', alpha=I(0.3))
 ```
 
-![](EEG_files/figure-html/unnamed-chunk-5-4.png)<!-- -->
-
+![](EEG_files/figure-html/unnamed-chunk-6-4.png)<!-- -->

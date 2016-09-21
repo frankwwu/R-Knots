@@ -11,6 +11,7 @@ https://www.kaggle.com/wanghaohan/eeg-brain-wave-for-confusion
 
 ```{r warning=FALSE, message=FALSE}
 library(RCurl)
+library(knitr)
 library(corrplot)
 library(ggfortify)
 ```
@@ -20,9 +21,14 @@ library(ggfortify)
 ```{r}
 url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/EEG-data.csv')
 eeg <- read.csv(text = url) 
+
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/EEG%20Brain%20Wave%20for%20Confusion/demographic-info.csv')
+demography<-read.csv(text = url) 
 ```
 
 ###Data Exploration
+
+####1. EEG Data
 
 ```{r}
 str(eeg)
@@ -59,6 +65,12 @@ corrplot(correlation, type="lower", p.mat = cor.mtest(eeg), sig.level = 0.01)
 
 In the above figure, correlations with p-value > 0.01 are considered as insignificant. In this case the correlation coefficient values are leaved blank or crosses are added.
 
+####2. Demographic Info
+
+```{r}
+kable(demography)
+```
+
 ###PCA
 
 ```{r}
@@ -75,4 +87,3 @@ autoplot(pca, data =eeg, colour ='Self.defined.label', alpha=I(0.4))
 autoplot(pca, data =eeg, colour ='predefined.label', alpha=I(0.4), loadings = TRUE, loadings.label = TRUE, loadings.colour = 'blue4', loadings.label.colour = 'darkgreen')
 autoplot(pca, data =eeg, colour ='subject.ID', alpha=I(0.3))
 ```
-
