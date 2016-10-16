@@ -1,4 +1,4 @@
-# EGG Brain Wave for Confusion
+# EEG Brain Wave for Confusion
 
 ### Source
 
@@ -7,7 +7,7 @@ https://www.kaggle.com/wanghaohan/eeg-brain-wave-for-confusion
 
 ```r
 library(RCurl)
-library(knitr)
+library(formattable)
 library(corrplot)
 library(ggfortify)
 ```
@@ -114,23 +114,82 @@ In the above figure, correlations with p-value > 0.01 are considered as insignif
 
 
 ```r
-kable(demography)
+formattable(demography, list(gender=formatter("span", style = x ~ ifelse(x == "M", style(color = "blue "), style(color = "red")))), align ="l")
 ```
 
 
-
- subject.ID   age  ethnicity     gender 
------------  ----  ------------  -------
-          0    25  Han Chinese   M      
-          1    24  Han Chinese   M      
-          2    31  English       M      
-          3    28  Han Chinese   F      
-          4    24  Bengali       M      
-          5    24  Han Chinese   M      
-          6    24  Han Chinese   M      
-          7    25  Han Chinese   M      
-          8    25  Han Chinese   M      
-          9    24  Han Chinese   F      
+<table class="table table-condensed">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> subject.ID </th>
+   <th style="text-align:left;"> age </th>
+   <th style="text-align:left;"> ethnicity </th>
+   <th style="text-align:left;"> gender </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> 0 </td>
+   <td style="text-align:left;"> 25 </td>
+   <td style="text-align:left;"> Han Chinese </td>
+   <td style="text-align:left;"> <span style="color: blue ">M</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> 24 </td>
+   <td style="text-align:left;"> Han Chinese </td>
+   <td style="text-align:left;"> <span style="color: blue ">M</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 2 </td>
+   <td style="text-align:left;"> 31 </td>
+   <td style="text-align:left;"> English </td>
+   <td style="text-align:left;"> <span style="color: blue ">M</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> 28 </td>
+   <td style="text-align:left;"> Han Chinese </td>
+   <td style="text-align:left;"> <span style="color: red">F</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 4 </td>
+   <td style="text-align:left;"> 24 </td>
+   <td style="text-align:left;"> Bengali </td>
+   <td style="text-align:left;"> <span style="color: blue ">M</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> 24 </td>
+   <td style="text-align:left;"> Han Chinese </td>
+   <td style="text-align:left;"> <span style="color: blue ">M</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 6 </td>
+   <td style="text-align:left;"> 24 </td>
+   <td style="text-align:left;"> Han Chinese </td>
+   <td style="text-align:left;"> <span style="color: blue ">M</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 7 </td>
+   <td style="text-align:left;"> 25 </td>
+   <td style="text-align:left;"> Han Chinese </td>
+   <td style="text-align:left;"> <span style="color: blue ">M</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 8 </td>
+   <td style="text-align:left;"> 25 </td>
+   <td style="text-align:left;"> Han Chinese </td>
+   <td style="text-align:left;"> <span style="color: blue ">M</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 9 </td>
+   <td style="text-align:left;"> 24 </td>
+   <td style="text-align:left;"> Han Chinese </td>
+   <td style="text-align:left;"> <span style="color: red">F</span> </td>
+  </tr>
+</tbody>
+</table>
 
 ###PCA
 

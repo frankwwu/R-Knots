@@ -1,8 +1,8 @@
 ---
-title: "EGG Brain Wave for Confusion"
-output: 
-  html_document: 
-    keep_md: yes
+title: "EEG Brain Wave for Confusion"
+output:
+  html_notebook: default
+  html_document: default
 ---
 
 ### Source
@@ -11,7 +11,7 @@ https://www.kaggle.com/wanghaohan/eeg-brain-wave-for-confusion
 
 ```{r warning=FALSE, message=FALSE}
 library(RCurl)
-library(knitr)
+library(formattable)
 library(corrplot)
 library(ggfortify)
 ```
@@ -68,7 +68,7 @@ In the above figure, correlations with p-value > 0.01 are considered as insignif
 ####2. Demographic Info
 
 ```{r}
-kable(demography)
+formattable(demography, list(gender=formatter("span", style = x ~ ifelse(x == "M", style(color = "blue "), style(color = "red")))), align ="l")
 ```
 
 ###PCA
