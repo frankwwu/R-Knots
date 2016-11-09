@@ -1,0 +1,104 @@
+---
+title: "Titanic - Decision Trees"
+output: html_notebook
+---
+
+```{r warning=FALSE, message=FALSE}
+library(rpart)
+library(rattle)
+library(rpart.plot)
+library(dplyr)
+library(RCurl)
+library(ggplot2)
+```
+
+### 1. Reading data
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/train.csv')
+train <- read.csv(text = url) 
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/test.csv')
+test <- read.csv(text = url) 
+```
+
+### 2. Displaying data
+
+```{r}
+str(train)
+str(test)
+```
+
+### 3. Removing NAs
+
+```{r}
+train <- train %>% na.omit()
+test <- test %>% na.omit()
+```
+
+### 4. Converting categorical variables to factors
+
+```{r}
+train$Survived <- factor(train$Survived)
+train$Pclass <- factor(train$Pclass)
+test$Pclass <- factor(test$Pclass)
+```
+
+### 5. Visualizing the training data
+
+```{r}
+ggplot(train, aes(Age, Fare, color=Survived)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(Pclass~Sex) +
+  ggtitle("Training Data")
+```
+
+### 6.Selecting features
+
+```{r}
+formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
+```
+
+### 7. Creating the Classification Tree
+
+```{r, fig.height=8}
+set.seed(9)
+tree <- rpart(formula, data=train, method="class")
+fancyRpartPlot(tree, uniform=TRUE, main="Classification Tree")
+```
+
+### 8. Cross-Validation 
+
+To examine whether the tree model is over fitting, find the size of tree with the minimum error.
+
+```{r}
+plotcp(tree)
+tree$cptable[which.min(tree$cptable[,"xerror"]),"CP"]
+printcp(tree)
+```
+
+### 9. Pruning the Tree
+
+Prune the over fitting notes.
+
+```{r, fig.height=7}
+ptree<- prune(tree, cp= 0.02)
+fancyRpartPlot(ptree, uniform=TRUE, main="Pruned Classification Tree")
+```
+
+### 10. Predicting with the test data
+
+```{r}
+predict <- predict(ptree, test, type = "prob")
+```
+
+### 11. Visualizing the result
+
+```{r}
+test$Survived <- predict[,2]
+ggplot(test, aes(Age, Fare, color=Survived)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(Pclass~Sex) +
+  ggtitle("Predictiom with the Test Data ")
+```
+
+
