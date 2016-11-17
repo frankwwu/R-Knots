@@ -6,7 +6,6 @@ output: html_notebook
 ```{r warning=FALSE, message=FALSE}
 library(rpart)
 library(rattle)
-library(rpart.plot)
 library(dplyr)
 library(RCurl)
 library(ggplot2)
@@ -81,7 +80,8 @@ printcp(tree)
 Prune the over fitting notes.
 
 ```{r, fig.height=7}
-ptree<- prune(tree, cp= 0.02)
+trim <- tree$cptable[which.min(tree$cptable[,"xerror"]),"CP"]
+ptree<- prune(tree, cp=trim)
 fancyRpartPlot(ptree, uniform=TRUE, main="Pruned Classification Tree")
 ```
 

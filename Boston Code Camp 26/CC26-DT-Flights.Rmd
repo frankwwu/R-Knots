@@ -1,0 +1,109 @@
+---
+title: "Flights - Decision Trees"
+output: html_notebook
+---
+
+
+```{r warning=FALSE, message=FALSE}
+library(hflights)
+library(rpart)
+library(rattle)
+library(rpart.plot)
+library(ggplot2)
+```
+
+
+### 1. Cleaning data
+
+```{r}
+hflights <- hflights %>% na.omit()
+```
+
+### 2. Exploring data
+
+```{r}
+str(hflights)
+ggplot() + 
+    geom_density(aes(x=DepDelay), colour="red", data=hflights[(hflights$DepDelay<=60 & hflights$DepDelay >= -30),]) + 
+    geom_density(aes(x=ArrDelay), colour="blue", data=hflights[(hflights$ArrDelay<=60 & hflights$ArrDelay >= -30),]) +
+    labs(x="Delay (min)") +
+    ggtitle("Departure and Arrival Delay Density")
+```
+
+#### Departure delay plot
+
+```{r, fig.width=12}
+ggplot(hflights, aes(DepTime, DepDelay)) + geom_point(aes(colour = DepDelay)) + 
+  scale_x_discrete(limits=c(0:2359), breaks = seq(0, 2359, 100))
+```
+
+#### Arrival delay plot
+
+```{r, fig.width=12}
+ggplot(hflights, aes(ArrTime, ArrDelay)) + geom_point(aes(colour = ArrDelay)) + 
+  scale_x_discrete(limits=c(0:2359), breaks = seq(0, 2359, 100)) +
+  scale_fill_distiller(palette = "Spectral")
+```
+
+### 3. Departure delay -- regresion tree
+
+```{r , fig.hight=10, fig.width=10}
+formula =  DepDelay ~ Month + DayofMonth +DayOfWeek + DepTime + ArrTime + UniqueCarrier + FlightNum +  ActualElapsedTime + AirTime + Origin + Dest + Distance + TaxiIn + TaxiOut
+
+set.seed(7)
+fit <- rpart(formula, data=hflights, method="anova")
+
+fancyRpartPlot(fit)
+
+plotcp(fit)
+fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"]
+printcp(fit)
+```
+
+### 4. Departure delay longer than 1 hour -- classification tree
+
+```{r , fig.hight=10, fig.width=10}
+hflights$DepDelay60 <-hflights$DepDelay > 60
+formula =  DepDelay60 ~ Month + DayofMonth +DayOfWeek + DepTime + ArrTime + UniqueCarrier + FlightNum +  ActualElapsedTime + AirTime + Origin + Dest + Distance + TaxiIn + TaxiOut
+
+set.seed(7)
+fit <- rpart(formula, data=hflights, method="class")
+
+fancyRpartPlot(fit)
+
+plotcp(fit)
+fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"]
+printcp(fit)
+```
+
+### 5. Arrival delay -- regresion tree
+
+```{r , fig.hight=10, fig.width=10}
+formula =  ArrDelay ~ Month + DayofMonth +DayOfWeek + DepTime + ArrTime + UniqueCarrier + FlightNum +  ActualElapsedTime + AirTime + Origin + Dest + Distance + TaxiIn + TaxiOut
+
+set.seed(7)
+fit <- rpart(formula, data=hflights, method="anova")
+
+fancyRpartPlot(fit)
+
+plotcp(fit)
+fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"]
+printcp(fit)
+```
+
+
+### 6. Arrival delay longer than 1 hour -- classification tree
+
+```{r , fig.hight=10, fig.width=10}
+hflights$ArrDelay60 <-hflights$ArrDelay > 60
+formula =  ArrDelay60 ~ Month + DayofMonth +DayOfWeek + DepTime + ArrTime + UniqueCarrier + FlightNum +  ActualElapsedTime + AirTime + Origin + Dest + Distance + TaxiIn + TaxiOut
+
+set.seed(7)
+fit <- rpart(formula, data=hflights, method="class")
+
+fancyRpartPlot(fit)
+
+plotcp(fit)
+fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"]
+printcp(fit)
+```
