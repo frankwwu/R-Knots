@@ -1,0 +1,80 @@
+---
+title: "Titanic - Decision Trees"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+### Variable Descriptions
+
+**Survival**:  Survival (0 = No; 1 = Yes) 
+
+**Pclass**:    Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd) 
+
+**Name**:      Name 
+
+**Sex**:       Sex 
+
+**Age**:       Age 
+
+**Sibsp**:     Number of Siblings/Spouses Aboard 
+
+**Parch**:     Number of Parents/Children Aboard 
+
+**Ticket**:    Ticket Number 
+
+**Fare**:      Passenger Fare 
+
+**Cabin**:     Cabin 
+
+**Embarked**:  Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton) 
+
+```{r warning=FALSE, message=FALSE}
+library(randomForest)
+library(dplyr)
+library(RCurl)
+```
+
+### 1. Reading data
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/train.csv')
+train <- read.csv(text = url) 
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic/test.csv')
+test <- read.csv(text = url) 
+```
+
+### 2. Displaying data
+
+```{r}
+str(train)
+str(test)
+```
+
+### 3. Removing NAs
+
+```{r}
+train<-train[, !(colnames(train) %in% c('Name', 'Ticket', 'Cabin'))]
+train <-train %>% na.omit()
+test<-test[, !(colnames(test) %in% c('Name', 'Ticket', 'Cabin'))]
+test <- test %>% na.omit()
+```
+
+### 4. Selecting features
+
+```{r}
+train$Survived <- factor(train$Survived)
+formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
+```
+
+### 5. Creating random forests
+
+Constructing a multitude of decision trees at training time. Random decision forests correct for decision trees' habit of overfitting to their training set.
+
+```{r}
+fit <- randomForest(formula, data=train)
+print(fit)
+importance(fit)
+```
+
+

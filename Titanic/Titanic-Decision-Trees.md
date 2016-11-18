@@ -28,12 +28,11 @@
 ```r
 library(rpart)
 library(rattle)
-library(rpart.plot)
 library(dplyr)
 library(RCurl)
 ```
 
-### Reading data
+### 1. Reading data
 
 
 ```r
@@ -43,7 +42,7 @@ url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Titanic
 test <- read.csv(text = url) 
 ```
 
-### Removing NA.
+### 2. Removing NAs
 
 
 ```r
@@ -53,7 +52,7 @@ test<-test[, !(colnames(test) %in% c('Name', 'Ticket', 'Cabin'))]
 test <- test %>% na.omit()
 ```
 
-### 1. Selecting features
+### 3. Selecting features
 
 
 ```r
@@ -61,281 +60,412 @@ train$Survived <- factor(train$Survived)
 formula = Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked
 ```
 
-### 2. Creating classification tree
+### 4. Creating classification tree
 
 
 ```r
 set.seed(200)
-fit <- rpart(formula, data=train, method="class")
-fancyRpartPlot(fit)
+tree <- rpart(formula, data=train, method="class")
+fancyRpartPlot(tree)
 ```
 
-![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-5-1.png)
+![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
-### Prune the tree
+### 5. Cross-Validation 
+
+To examine whether the tree model is over fitting, find the size of tree with the minimum error.
+
+
+```r
+plotcp(tree)
+```
+
+![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+```r
+tree$cptable[which.min(tree$cptable[,"xerror"]),"CP"]
+```
+
+```
+## [1] 0.01034483
+```
+
+```r
+printcp(tree)
+```
+
+```
+## 
+## Classification tree:
+## rpart(formula = formula, data = train, method = "class")
+## 
+## Variables actually used in tree construction:
+## [1] Age    Fare   Parch  Pclass Sex    SibSp 
+## 
+## Root node error: 290/714 = 0.40616
+## 
+## n= 714 
+## 
+##         CP nsplit rel error  xerror     xstd
+## 1 0.458621      0   1.00000 1.00000 0.045252
+## 2 0.029310      1   0.54138 0.54138 0.038162
+## 3 0.027586      3   0.48276 0.55517 0.038506
+## 4 0.024138      4   0.45517 0.53448 0.037986
+## 5 0.010345      5   0.43103 0.50345 0.037162
+## 6 0.010000      9   0.38966 0.53103 0.037897
+```
+
+### 6. Prune the tree
 Prune back the tree to avoid overfitting the data. Typically, you will want to select a tree size that minimizes the cross-validated error, the xerror column printed by printcp( ).
 
 
 ```r
-pfit<- prune(fit, cp=fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"])
-fancyRpartPlot(pfit)
+ptree<- prune(tree, cp=tree$cptable[which.min(tree$cptable[,"xerror"]),"CP"])
+fancyRpartPlot(ptree)
 ```
 
-![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-6-1.png)
+![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-### Prediction
+### 7. Prediction
 
 
 ```r
-Prediction <- predict(pfit, test, type = "prob")
-#Prediction
-```
-
-### Trying to tweak rpart.control control parameters.
-
-
-```r
-fit <- rpart(formula, data=train, method="class", control=rpart.control(minsplit=2, cp=0))
-fancyRpartPlot(fit)
+Prediction <- predict(ptree, test, type = "prob")
+Prediction
 ```
 
 ```
-## Warning: labs do not fit even at cex 0.15, there may be some overplotting
+##              0         1
+## 1   0.82051282 0.1794872
+## 2   0.44303797 0.5569620
+## 3   0.82051282 0.1794872
+## 4   0.82051282 0.1794872
+## 5   0.44303797 0.5569620
+## 6   0.82051282 0.1794872
+## 7   0.44303797 0.5569620
+## 8   0.82051282 0.1794872
+## 9   0.44303797 0.5569620
+## 10  0.82051282 0.1794872
+## 12  0.82051282 0.1794872
+## 13  0.05660377 0.9433962
+## 14  0.82051282 0.1794872
+## 15  0.05660377 0.9433962
+## 16  0.05660377 0.9433962
+## 17  0.82051282 0.1794872
+## 18  0.82051282 0.1794872
+## 19  0.44303797 0.5569620
+## 20  0.44303797 0.5569620
+## 21  0.82051282 0.1794872
+## 22  0.82051282 0.1794872
+## 24  0.82051282 0.1794872
+## 25  0.05660377 0.9433962
+## 26  0.82051282 0.1794872
+## 27  0.05660377 0.9433962
+## 28  0.82051282 0.1794872
+## 29  0.82051282 0.1794872
+## 31  0.82051282 0.1794872
+## 32  0.82051282 0.1794872
+## 33  0.44303797 0.5569620
+## 35  0.82051282 0.1794872
+## 36  0.82051282 0.1794872
+## 38  0.44303797 0.5569620
+## 39  0.82051282 0.1794872
+## 41  0.82051282 0.1794872
+## 43  0.82051282 0.1794872
+## 44  0.05660377 0.9433962
+## 45  0.05660377 0.9433962
+## 46  0.82051282 0.1794872
+## 47  0.82051282 0.1794872
+## 49  0.05660377 0.9433962
+## 50  0.44303797 0.5569620
+## 51  0.82051282 0.1794872
+## 52  0.82051282 0.1794872
+## 53  0.05660377 0.9433962
+## 54  0.05660377 0.9433962
+## 56  0.82051282 0.1794872
+## 57  0.82051282 0.1794872
+## 58  0.82051282 0.1794872
+## 60  0.05660377 0.9433962
+## 61  0.82051282 0.1794872
+## 62  0.82051282 0.1794872
+## 63  0.82051282 0.1794872
+## 64  0.44303797 0.5569620
+## 65  0.82051282 0.1794872
+## 67  0.44303797 0.5569620
+## 68  0.82051282 0.1794872
+## 69  0.82051282 0.1794872
+## 70  0.05660377 0.9433962
+## 71  0.44303797 0.5569620
+## 72  0.82051282 0.1794872
+## 73  0.44303797 0.5569620
+## 74  0.82051282 0.1794872
+## 75  0.05660377 0.9433962
+## 76  0.82051282 0.1794872
+## 78  0.05660377 0.9433962
+## 79  0.82051282 0.1794872
+## 80  0.44303797 0.5569620
+## 81  0.00000000 1.0000000
+## 82  0.82051282 0.1794872
+## 83  0.82051282 0.1794872
+## 87  0.44303797 0.5569620
+## 88  0.44303797 0.5569620
+## 90  0.00000000 1.0000000
+## 91  0.44303797 0.5569620
+## 93  0.05660377 0.9433962
+## 95  0.82051282 0.1794872
+## 96  0.82051282 0.1794872
+## 97  0.05660377 0.9433962
+## 98  0.82051282 0.1794872
+## 99  0.44303797 0.5569620
+## 100 0.82051282 0.1794872
+## 101 0.05660377 0.9433962
+## 102 0.82051282 0.1794872
+## 104 0.82051282 0.1794872
+## 105 0.44303797 0.5569620
+## 106 0.82051282 0.1794872
+## 107 0.82051282 0.1794872
+## 110 0.82051282 0.1794872
+## 111 0.82051282 0.1794872
+## 113 0.05660377 0.9433962
+## 114 0.44303797 0.5569620
+## 115 0.05660377 0.9433962
+## 116 0.82051282 0.1794872
+## 118 0.44303797 0.5569620
+## 119 0.82051282 0.1794872
+## 120 0.05660377 0.9433962
+## 121 0.05660377 0.9433962
+## 123 0.05660377 0.9433962
+## 124 0.82051282 0.1794872
+## 126 0.44303797 0.5569620
+## 127 0.82051282 0.1794872
+## 129 0.82051282 0.1794872
+## 130 0.82051282 0.1794872
+## 131 0.82051282 0.1794872
+## 132 0.82051282 0.1794872
+## 135 0.82051282 0.1794872
+## 136 0.82051282 0.1794872
+## 137 0.82051282 0.1794872
+## 138 0.82051282 0.1794872
+## 139 0.44303797 0.5569620
+## 140 0.82051282 0.1794872
+## 141 0.86956522 0.1304348
+## 142 0.05660377 0.9433962
+## 143 0.82051282 0.1794872
+## 144 0.82051282 0.1794872
+## 145 0.82051282 0.1794872
+## 146 0.82051282 0.1794872
+## 148 0.82051282 0.1794872
+## 150 0.82051282 0.1794872
+## 151 0.05660377 0.9433962
+## 154 0.44303797 0.5569620
+## 155 0.82051282 0.1794872
+## 156 0.82051282 0.1794872
+## 157 0.05660377 0.9433962
+## 158 0.44303797 0.5569620
+## 159 0.82051282 0.1794872
+## 160 0.44303797 0.5569620
+## 162 0.82051282 0.1794872
+## 163 0.05660377 0.9433962
+## 165 0.82051282 0.1794872
+## 166 0.86956522 0.1304348
+## 167 0.82051282 0.1794872
+## 168 0.82051282 0.1794872
+## 170 0.44303797 0.5569620
+## 172 0.82051282 0.1794872
+## 173 0.82051282 0.1794872
+## 175 0.82051282 0.1794872
+## 176 0.05660377 0.9433962
+## 177 0.05660377 0.9433962
+## 178 0.82051282 0.1794872
+## 179 0.05660377 0.9433962
+## 180 0.05660377 0.9433962
+## 181 0.82051282 0.1794872
+## 182 0.82051282 0.1794872
+## 183 0.05660377 0.9433962
+## 185 0.05660377 0.9433962
+## 186 0.82051282 0.1794872
+## 187 0.05660377 0.9433962
+## 188 0.82051282 0.1794872
+## 190 0.82051282 0.1794872
+## 191 0.82051282 0.1794872
+## 193 0.82051282 0.1794872
+## 194 0.82051282 0.1794872
+## 195 0.82051282 0.1794872
+## 196 0.82051282 0.1794872
+## 197 0.00000000 1.0000000
+## 198 0.44303797 0.5569620
+## 199 0.82051282 0.1794872
+## 202 0.00000000 1.0000000
+## 203 0.82051282 0.1794872
+## 204 0.05660377 0.9433962
+## 205 0.82051282 0.1794872
+## 207 0.44303797 0.5569620
+## 208 0.82051282 0.1794872
+## 209 0.05660377 0.9433962
+## 210 0.82051282 0.1794872
+## 211 0.82051282 0.1794872
+## 213 0.82051282 0.1794872
+## 214 0.05660377 0.9433962
+## 215 0.44303797 0.5569620
+## 216 0.82051282 0.1794872
+## 218 0.82051282 0.1794872
+## 219 0.05660377 0.9433962
+## 221 0.05660377 0.9433962
+## 222 0.82051282 0.1794872
+## 223 0.05660377 0.9433962
+## 224 0.82051282 0.1794872
+## 225 0.05660377 0.9433962
+## 227 0.82051282 0.1794872
+## 229 0.82051282 0.1794872
+## 230 0.82051282 0.1794872
+## 231 0.82051282 0.1794872
+## 232 0.05660377 0.9433962
+## 233 0.82051282 0.1794872
+## 235 0.82051282 0.1794872
+## 236 0.82051282 0.1794872
+## 237 0.82051282 0.1794872
+## 238 0.82051282 0.1794872
+## 239 0.05660377 0.9433962
+## 240 0.05660377 0.9433962
+## 241 0.05660377 0.9433962
+## 242 0.05660377 0.9433962
+## 243 0.82051282 0.1794872
+## 246 0.82051282 0.1794872
+## 247 0.05660377 0.9433962
+## 248 0.82051282 0.1794872
+## 249 0.05660377 0.9433962
+## 251 0.05660377 0.9433962
+## 252 0.82051282 0.1794872
+## 253 0.82051282 0.1794872
+## 254 0.82051282 0.1794872
+## 255 0.82051282 0.1794872
+## 258 0.82051282 0.1794872
+## 259 0.05660377 0.9433962
+## 260 0.82051282 0.1794872
+## 261 0.82051282 0.1794872
+## 262 0.82051282 0.1794872
+## 263 0.05660377 0.9433962
+## 264 0.44303797 0.5569620
+## 265 0.82051282 0.1794872
+## 270 0.82051282 0.1794872
+## 271 0.82051282 0.1794872
+## 273 0.05660377 0.9433962
+## 276 0.05660377 0.9433962
+## 277 0.82051282 0.1794872
+## 278 0.82051282 0.1794872
+## 279 0.82051282 0.1794872
+## 280 0.82051282 0.1794872
+## 281 0.44303797 0.5569620
+## 282 0.00000000 1.0000000
+## 284 0.44303797 0.5569620
+## 285 0.44303797 0.5569620
+## 286 0.82051282 0.1794872
+## 288 0.82051282 0.1794872
+## 292 0.44303797 0.5569620
+## 294 0.82051282 0.1794872
+## 295 0.82051282 0.1794872
+## 296 0.82051282 0.1794872
+## 297 0.05660377 0.9433962
+## 299 0.82051282 0.1794872
+## 300 0.82051282 0.1794872
+## 301 0.82051282 0.1794872
+## 303 0.82051282 0.1794872
+## 304 0.82051282 0.1794872
+## 306 0.05660377 0.9433962
+## 307 0.82051282 0.1794872
+## 308 0.00000000 1.0000000
+## 309 0.82051282 0.1794872
+## 310 0.44303797 0.5569620
+## 311 0.82051282 0.1794872
+## 312 0.82051282 0.1794872
+## 314 0.44303797 0.5569620
+## 315 0.05660377 0.9433962
+## 316 0.44303797 0.5569620
+## 317 0.82051282 0.1794872
+## 318 0.82051282 0.1794872
+## 319 0.82051282 0.1794872
+## 320 0.82051282 0.1794872
+## 321 0.82051282 0.1794872
+## 322 0.82051282 0.1794872
+## 323 0.82051282 0.1794872
+## 324 0.82051282 0.1794872
+## 325 0.05660377 0.9433962
+## 326 0.82051282 0.1794872
+## 327 0.05660377 0.9433962
+## 328 0.82051282 0.1794872
+## 329 0.82051282 0.1794872
+## 330 0.82051282 0.1794872
+## 331 0.05660377 0.9433962
+## 332 0.82051282 0.1794872
+## 334 0.44303797 0.5569620
+## 335 0.82051282 0.1794872
+## 336 0.82051282 0.1794872
+## 337 0.82051282 0.1794872
+## 338 0.82051282 0.1794872
+## 339 0.82051282 0.1794872
+## 341 0.82051282 0.1794872
+## 342 0.82051282 0.1794872
+## 344 0.05660377 0.9433962
+## 346 0.44303797 0.5569620
+## 347 0.82051282 0.1794872
+## 348 0.44303797 0.5569620
+## 349 0.82051282 0.1794872
+## 350 0.05660377 0.9433962
+## 351 0.05660377 0.9433962
+## 352 0.82051282 0.1794872
+## 353 0.82051282 0.1794872
+## 354 0.82051282 0.1794872
+## 355 0.44303797 0.5569620
+## 356 0.82051282 0.1794872
+## 357 0.05660377 0.9433962
+## 360 0.44303797 0.5569620
+## 361 0.82051282 0.1794872
+## 362 0.05660377 0.9433962
+## 363 0.05660377 0.9433962
+## 364 0.82051282 0.1794872
+## 365 0.05660377 0.9433962
+## 368 0.86956522 0.1304348
+## 369 0.05660377 0.9433962
+## 370 0.82051282 0.1794872
+## 371 0.82051282 0.1794872
+## 372 0.05660377 0.9433962
+## 373 0.82051282 0.1794872
+## 374 0.82051282 0.1794872
+## 375 0.05660377 0.9433962
+## 376 0.05660377 0.9433962
+## 377 0.44303797 0.5569620
+## 378 0.82051282 0.1794872
+## 379 0.82051282 0.1794872
+## 380 0.88888889 0.1111111
+## 382 0.82051282 0.1794872
+## 384 0.44303797 0.5569620
+## 386 0.05660377 0.9433962
+## 387 0.82051282 0.1794872
+## 388 0.82051282 0.1794872
+## 389 0.82051282 0.1794872
+## 390 0.88888889 0.1111111
+## 391 0.82051282 0.1794872
+## 392 0.05660377 0.9433962
+## 393 0.82051282 0.1794872
+## 394 0.82051282 0.1794872
+## 395 0.82051282 0.1794872
+## 396 0.05660377 0.9433962
+## 397 0.82051282 0.1794872
+## 398 0.05660377 0.9433962
+## 399 0.82051282 0.1794872
+## 400 0.82051282 0.1794872
+## 401 0.05660377 0.9433962
+## 402 0.82051282 0.1794872
+## 403 0.05660377 0.9433962
+## 404 0.82051282 0.1794872
+## 405 0.82051282 0.1794872
+## 406 0.82051282 0.1794872
+## 407 0.82051282 0.1794872
+## 408 0.82051282 0.1794872
+## 410 0.44303797 0.5569620
+## 412 0.05660377 0.9433962
+## 413 0.44303797 0.5569620
+## 415 0.05660377 0.9433962
+## 416 0.82051282 0.1794872
 ```
-
-![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-8-1.png)
-
-```r
-fit <- rpart(formula, data=train, method="class", control=rpart.control(minsplit=2, cp=0, minbucket=2))
-fancyRpartPlot(fit)
-```
-
-```
-## Warning: labs do not fit even at cex 0.15, there may be some overplotting
-```
-
-![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-8-2.png)
-
-### 3. Creating regression tree
-
-
-```r
-fit <- rpart(formula, data=train, method="anova")
-# Plot tree 
-fancyRpartPlot(fit)
-```
-
-![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-9-1.png)
-
-```r
-# Visualize cross-validation results
-plotcp(fit) 
-```
-
-![](Titanic-Decision-Trees_files/figure-html/unnamed-chunk-9-2.png)
-
-```r
-# Detailed summary of splits
-summary(fit)
-```
-
-```
-## Call:
-## rpart(formula = formula, data = train, method = "anova")
-##   n= 714 
-## 
-##           CP nsplit rel error    xerror       xstd
-## 1 0.29033302      0 1.0000000 1.0029968 0.01437210
-## 2 0.08404023      1 0.7096670 0.7127836 0.03606339
-## 3 0.03132439      2 0.6256268 0.6288479 0.03456130
-## 4 0.03120810      3 0.5943024 0.6311605 0.03631107
-## 5 0.02580785      4 0.5630943 0.5976796 0.03559951
-## 6 0.01881840      5 0.5372864 0.5802332 0.03527277
-## 7 0.01005920      6 0.5184680 0.5643923 0.03596314
-## 8 0.01000000      7 0.5084088 0.5844896 0.03752183
-## 
-## Variable importance
-##      Sex   Pclass     Fare      Age    Parch    SibSp Embarked 
-##       42       18       16        9        6        6        2 
-## 
-## Node number 1: 714 observations,    complexity param=0.290333
-##   mean=1.406162, MSE=0.2411945 
-##   left son=2 (453 obs) right son=3 (261 obs)
-##   Primary splits:
-##       Sex      splits as  RL,           improve=0.29033300, (0 missing)
-##       Pclass   < 2.5      to the right, improve=0.11396520, (0 missing)
-##       Fare     < 52.2771  to the left,  improve=0.09724745, (0 missing)
-##       Embarked splits as  RRLL,         improve=0.04047720, (0 missing)
-##       Parch    < 0.5      to the left,  improve=0.02704447, (0 missing)
-##   Surrogate splits:
-##       Fare     < 77.6229  to the left,  agree=0.668, adj=0.092, (0 split)
-##       Parch    < 0.5      to the left,  agree=0.667, adj=0.088, (0 split)
-##       Age      < 15.5     to the right, agree=0.639, adj=0.011, (0 split)
-##       Embarked splits as  RLLL,         agree=0.637, adj=0.008, (0 split)
-## 
-## Node number 2: 453 observations,    complexity param=0.03132439
-##   mean=1.205298, MSE=0.1631507 
-##   left son=4 (429 obs) right son=5 (24 obs)
-##   Primary splits:
-##       Age      < 6.5      to the right, improve=0.07298961, (0 missing)
-##       Pclass   < 1.5      to the right, improve=0.06398534, (0 missing)
-##       Fare     < 26.26875 to the left,  improve=0.05454819, (0 missing)
-##       Embarked splits as  -RLL,         improve=0.02237328, (0 missing)
-##       Parch    < 0.5      to the left,  improve=0.01786985, (0 missing)
-## 
-## Node number 3: 261 observations,    complexity param=0.08404023
-##   mean=1.754789, MSE=0.1850824 
-##   left son=6 (102 obs) right son=7 (159 obs)
-##   Primary splits:
-##       Pclass   < 2.5      to the right, improve=0.29960370, (0 missing)
-##       Fare     < 48.2     to the left,  improve=0.10867610, (0 missing)
-##       Parch    < 3.5      to the right, improve=0.05575780, (0 missing)
-##       SibSp    < 2.5      to the right, improve=0.04146980, (0 missing)
-##       Embarked splits as  RRLL,         improve=0.03866644, (0 missing)
-##   Surrogate splits:
-##       Fare     < 22.5125  to the left,  agree=0.785, adj=0.451, (0 split)
-##       Age      < 18.5     to the left,  agree=0.678, adj=0.176, (0 split)
-##       SibSp    < 1.5      to the right, agree=0.644, adj=0.088, (0 split)
-##       Embarked splits as  RRLR,         agree=0.640, adj=0.078, (0 split)
-##       Parch    < 2.5      to the right, agree=0.636, adj=0.069, (0 split)
-## 
-## Node number 4: 429 observations,    complexity param=0.0312081
-##   mean=1.179487, MSE=0.1472715 
-##   left son=8 (330 obs) right son=9 (99 obs)
-##   Primary splits:
-##       Pclass   < 1.5      to the right, improve=0.085066160, (0 missing)
-##       Fare     < 26.26875 to the left,  improve=0.068393910, (0 missing)
-##       Embarked splits as  -RLL,         improve=0.027852730, (0 missing)
-##       Age      < 24.75    to the left,  improve=0.009777594, (0 missing)
-##       SibSp    < 1.5      to the right, improve=0.007115702, (0 missing)
-##   Surrogate splits:
-##       Fare     < 26.26875 to the left,  agree=0.911, adj=0.616, (0 split)
-##       Age      < 44.5     to the left,  agree=0.800, adj=0.131, (0 split)
-##       Embarked splits as  -RLL,         agree=0.781, adj=0.051, (0 split)
-## 
-## Node number 5: 24 observations,    complexity param=0.02580785
-##   mean=1.666667, MSE=0.2222222 
-##   left son=10 (9 obs) right son=11 (15 obs)
-##   Primary splits:
-##       SibSp  < 2.5      to the right, improve=0.83333330, (0 missing)
-##       Pclass < 2.5      to the right, improve=0.35714290, (0 missing)
-##       Fare   < 20.825   to the right, improve=0.25000000, (0 missing)
-##       Age    < 1.5      to the right, improve=0.05714286, (0 missing)
-##   Surrogate splits:
-##       Pclass   < 2.5      to the right, agree=0.792, adj=0.444, (0 split)
-##       Fare     < 26.95    to the right, agree=0.750, adj=0.333, (0 split)
-##       Embarked splits as  -RLR,         agree=0.708, adj=0.222, (0 split)
-## 
-## Node number 6: 102 observations,    complexity param=0.0188184
-##   mean=1.460784, MSE=0.2484621 
-##   left son=12 (23 obs) right son=13 (79 obs)
-##   Primary splits:
-##       Fare     < 20.8     to the right, improve=0.12787570, (0 missing)
-##       Age      < 38.5     to the right, improve=0.07645390, (0 missing)
-##       SibSp    < 0.5      to the right, improve=0.04218376, (0 missing)
-##       Embarked splits as  -RLL,         improve=0.03848792, (0 missing)
-##       Parch    < 3.5      to the right, improve=0.02997571, (0 missing)
-##   Surrogate splits:
-##       Parch < 1.5      to the right, agree=0.902, adj=0.565, (0 split)
-##       SibSp < 2.5      to the right, agree=0.853, adj=0.348, (0 split)
-##       Age   < 12       to the left,  agree=0.784, adj=0.043, (0 split)
-## 
-## Node number 7: 159 observations
-##   mean=1.943396, MSE=0.05339979 
-## 
-## Node number 8: 330 observations
-##   mean=1.118182, MSE=0.1042149 
-## 
-## Node number 9: 99 observations,    complexity param=0.0100592
-##   mean=1.383838, MSE=0.2365065 
-##   left son=18 (22 obs) right son=19 (77 obs)
-##   Primary splits:
-##       Age      < 53       to the right, improve=0.073986190, (0 missing)
-##       SibSp    < 0.5      to the left,  improve=0.010569460, (0 missing)
-##       Embarked splits as  -RLL,         improve=0.008874646, (0 missing)
-##       Fare     < 31.6604  to the right, improve=0.008874646, (0 missing)
-##       Parch    < 0.5      to the right, improve=0.002903697, (0 missing)
-## 
-## Node number 10: 9 observations
-##   mean=1.111111, MSE=0.09876543 
-## 
-## Node number 11: 15 observations
-##   mean=2, MSE=0 
-## 
-## Node number 12: 23 observations
-##   mean=1.130435, MSE=0.1134216 
-## 
-## Node number 13: 79 observations
-##   mean=1.556962, MSE=0.2467553 
-## 
-## Node number 18: 22 observations
-##   mean=1.136364, MSE=0.1177686 
-## 
-## Node number 19: 77 observations
-##   mean=1.454545, MSE=0.2479339
-```
-
-### 4. Creating random forests
-
-Constructing a multitude of decision trees at training time. Random decision forests correct for decision trees' habit of overfitting to their training set.
-
-
-```r
-library(randomForest)
-```
-
-```
-## randomForest 4.6-12
-```
-
-```
-## Type rfNews() to see new features/changes/bug fixes.
-```
-
-```
-## 
-## Attaching package: 'randomForest'
-```
-
-```
-## The following object is masked from 'package:dplyr':
-## 
-##     combine
-```
-
-```r
-fit <- randomForest(formula, data=train)
-print(fit)
-```
-
-```
-## 
-## Call:
-##  randomForest(formula = formula, data = train) 
-##                Type of random forest: classification
-##                      Number of trees: 500
-## No. of variables tried at each split: 2
-## 
-##         OOB estimate of  error rate: 18.91%
-## Confusion matrix:
-##     0   1 class.error
-## 0 378  46   0.1084906
-## 1  89 201   0.3068966
-```
-
-```r
-importance(fit)
-```
-
-```
-##          MeanDecreaseGini
-## Pclass          30.459665
-## Sex             83.130594
-## Age             51.121243
-## SibSp           12.615861
-## Parch           10.414987
-## Fare            53.912920
-## Embarked         8.205936
-```
-
 
