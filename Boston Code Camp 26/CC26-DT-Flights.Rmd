@@ -6,10 +6,10 @@ output: html_notebook
 
 ```{r warning=FALSE, message=FALSE}
 library(hflights)
-library(rpart)
 library(rattle)
 library(rpart.plot)
 library(ggplot2)
+library(dplyr)
 ```
 
 
@@ -63,7 +63,7 @@ printcp(fit)
 ### 4. Departure delay longer than 1 hour -- classification tree
 
 ```{r , fig.hight=10, fig.width=10}
-hflights$DepDelay60 <-hflights$DepDelay > 60
+hflights$DepDelay60 <- hflights$DepDelay > 60
 formula =  DepDelay60 ~ Month + DayofMonth +DayOfWeek + DepTime + ArrTime + UniqueCarrier + FlightNum +  ActualElapsedTime + AirTime + Origin + Dest + Distance + TaxiIn + TaxiOut
 
 set.seed(7)
@@ -95,7 +95,7 @@ printcp(fit)
 ### 6. Arrival delay longer than 1 hour -- classification tree
 
 ```{r , fig.hight=10, fig.width=10}
-hflights$ArrDelay60 <-hflights$ArrDelay > 60
+hflights$ArrDelay60 <- hflights$ArrDelay > 60
 formula =  ArrDelay60 ~ Month + DayofMonth +DayOfWeek + DepTime + ArrTime + UniqueCarrier + FlightNum +  ActualElapsedTime + AirTime + Origin + Dest + Distance + TaxiIn + TaxiOut
 
 set.seed(7)
