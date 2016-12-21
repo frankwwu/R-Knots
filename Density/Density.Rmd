@@ -9,6 +9,7 @@ output:
 library(datasets)
 library(ggplot2)
 library(gridExtra)
+library(plotly)
 ```
 
 ###geom_boxplot
@@ -81,4 +82,18 @@ ggExtra::ggMarginal(p, type = "histogram")
 ggExtra::ggMarginal(p, type = "histogram", size = 2, col = "darkorange4", fill = "gold")
 
 ggExtra::ggMarginal(p, type = "boxplot", col = "navy", fill = "lightslateblue")
+```
+
+###ployly
+
+```{r warning=FALSE, message=FALSE}
+s <- subplot(
+  plot_ly(x = iris$Sepal.Length, type = "histogram"),
+  plotly_empty(),
+  plot_ly(x = iris$Sepal.Length, y = iris$Sepal.Width, type = "histogram2dcontour"),
+  plot_ly(y = iris$Sepal.Width, type = "histogram"),
+  nrows = 2, heights = c(0.2, 0.8), widths = c(0.8, 0.2), margin = 0, shareX = TRUE, shareY = TRUE, titleX = FALSE, titleY = FALSE
+)
+layout(s, showlegend = FALSE)
+
 ```
