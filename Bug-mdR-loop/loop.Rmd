@@ -1,0 +1,33 @@
+---
+title: "Bug: Creating multiple plots and tables with a loop"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r}
+library(foreach)
+library(formattable)
+```
+
+# This does not Work.
+
+```{r}
+for (i in 1:5)
+{
+  print(i)
+  formattable(pressure, align ="l")
+  plot(pressure)
+}
+```
+
+# This does not Work, too.
+
+```{r}
+foreach(i = 1:5) %do%
+{
+  print(i)
+  formattable(pressure, align ="l")
+  plot(pressure)
+}
+```
