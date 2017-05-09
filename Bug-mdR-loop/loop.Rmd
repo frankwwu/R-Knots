@@ -17,7 +17,9 @@ for (i in 1:5)
 {
   print(i)
   formattable(pressure, align ="l")
+  cat('\n')
   plot(pressure)
+  cat('\n')
 }
 ```
 
@@ -28,6 +30,8 @@ foreach(i = 1:5) %do%
 {
   print(i)
   formattable(pressure, align ="l")
+  cat('\n')
   plot(pressure)
+  cat('\n')
 }
 ```

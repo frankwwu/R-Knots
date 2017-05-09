@@ -14,7 +14,9 @@ for (i in 1:5)
 {
   print(i)
   formattable(pressure, align ="l")
+  cat('\n')
   plot(pressure)
+  cat('\n')
 }
 ```
 
@@ -23,20 +25,24 @@ for (i in 1:5)
 ```
 
 ```
+## 
 ## [1] 2
 ```
 
 ![](loop_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
 ```
+## 
 ## [1] 3
 ```
 
 ```
+## 
 ## [1] 4
 ```
 
 ```
+## 
 ## [1] 5
 ```
 
@@ -48,7 +54,9 @@ foreach(i = 1:5) %do%
 {
   print(i)
   formattable(pressure, align ="l")
+  cat('\n')
   plot(pressure)
+  cat('\n')
 }
 ```
 
@@ -57,20 +65,24 @@ foreach(i = 1:5) %do%
 ```
 
 ```
+## 
 ## [1] 2
 ```
 
 ![](loop_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
 ```
+## 
 ## [1] 3
 ```
 
 ```
+## 
 ## [1] 4
 ```
 
 ```
+## 
 ## [1] 5
 ```
 
