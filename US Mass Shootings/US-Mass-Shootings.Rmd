@@ -1,0 +1,51 @@
+---
+title: "US Mass Shootings"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+```{r}
+library(RCurl)
+library(lubridate)
+library(gridExtra)
+library(ggplot2)
+```
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/US%20Mass%20Shootings/Mass%20Shootings%20Dataset%20Ver%202.csv')
+shoot <- read.csv(text = url) 
+```
+
+
+```{r}
+names(shoot) <- sub(" ", ".", names(shoot))
+shoot$Month <- factor(month(as.Date(shoot$Date, format = "%m/%d/%Y")))
+shoot$Year <- factor(year(as.Date(shoot$Date, format = "%m/%d/%Y")))
+```
+
+
+```{r}
+ggplot(shoot, aes(x = Year)) + geom_bar(aes(fill = Year), width = 0.5) +
+  labs(title="Number of Shootings per Year") + 
+  theme(legend.position="none", axis.text.x=element_text(angle=90))
+```
+
+
+```{r}
+ggplot(shoot[shoot$Mental.Health.Issues=='Yes',], aes(x = Year)) + geom_bar(aes(fill = Year), width = 0.5) +
+  labs(title="Number of Shootings with Mental Health Issues per Year") + 
+  theme(legend.position="none", axis.text.x=element_text(angle=90))
+```
+
+
+```{r}
+ggplot(shoot, aes(x = Month)) + geom_bar(aes(fill=Month), width = 0.5) +
+  labs(title="Number of Shootings per Month") 
+```
+
+
+```{r}
+
+```
