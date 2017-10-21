@@ -1,8 +1,7 @@
 ---
 title: "US Mass Shootings"
 output: 
-  html_document: 
-    keep_md: yes
+  html_notebook
 ---
 
 
@@ -11,6 +10,9 @@ library(RCurl)
 library(lubridate)
 library(gridExtra)
 library(ggplot2)
+library(dplyr)
+library(formattable)
+library(scales)
 ```
 
 ```{r}
@@ -20,31 +22,95 @@ shoot <- read.csv(text = url)
 
 
 ```{r}
+shoot %>% mutate_if(is.factor, as.character) -> shoot
 names(shoot) <- sub(" ", ".", names(shoot))
 shoot$Month <- factor(month(as.Date(shoot$Date, format = "%m/%d/%Y")))
 shoot$Year <- factor(year(as.Date(shoot$Date, format = "%m/%d/%Y")))
+str(shoot)
+shoot[shoot$Mental.Health.Issues=="Unclear",]$Mental.Health.Issues<-"Unknown"
+shoot[shoot$Mental.Health.Issues=="unknown",]$Mental.Health.Issues<-"Unknown"
 ```
 
 
 ```{r}
-ggplot(shoot, aes(x = Year)) + geom_bar(aes(fill = Year), width = 0.5) +
+ggplot(shoot, aes(x = Year)) + 
+  geom_bar(aes(fill = Year), width = 0.5) +
   labs(title="Number of Shootings per Year") + 
   theme(legend.position="none", axis.text.x=element_text(angle=90))
 ```
 
 
 ```{r}
-ggplot(shoot[shoot$Mental.Health.Issues=='Yes',], aes(x = Year)) + geom_bar(aes(fill = Year), width = 0.5) +
+ggplot(shoot, aes(x = Year), groupName='Mental.Health.Issues') + 
+  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
   labs(title="Number of Shootings with Mental Health Issues per Year") + 
-  theme(legend.position="none", axis.text.x=element_text(angle=90))
+  theme(axis.text.x=element_text(angle=90)) +
+  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  theme(legend.position="bottom")
 ```
 
 
 ```{r}
-ggplot(shoot, aes(x = Month)) + geom_bar(aes(fill=Month), width = 0.5) +
-  labs(title="Number of Shootings per Month") 
+ggplot(shoot, aes(x = Month), groupName='Mental.Health.Issues') + 
+  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
+  labs(title="Number of Shootings with Mental Health Issues per Month") +
+  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  theme(legend.position="bottom")
 ```
 
+
+```{r}
+top10Fatalities <- shoot %>% filter(rank(desc(Fatalities)) <= 10)
+
+ggplot(top10Fatalities, aes(x = Year), groupName='Mental.Health.Issues') + 
+  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
+  scale_y_continuous(breaks=c(0,1,2)) +
+  labs(title="Top 10 Fatalities: Number of Shootings with Mental Health Issues per Year") + 
+  theme(axis.text.x=element_text(angle=90)) +
+  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  theme(legend.position="bottom")
+
+ggplot(top10Fatalities, aes(x = Month), groupName='Mental.Health.Issues') + 
+  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
+  scale_y_continuous(breaks=c(0,1,2)) +
+  labs(title="Top 10 Fatalities: Number of Shootings with Mental Health Issues per Month") +
+  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  theme(legend.position="bottom")
+```
+
+```{r}
+formattable(top10Fatalities, list(
+  Fatalities = color_tile("transparent", "coral"),
+  Injured = color_tile("transparent", "springgreen"),
+  Total.victims = color_tile("transparent", "violet")))
+```
+
+```{r}
+top10Total.victims <- shoot %>% filter(rank(desc(Total.victims)) <= 10)
+
+ggplot(top10Total.victims, aes(x = Year), groupName='Mental.Health.Issues') + 
+  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
+  scale_y_continuous(breaks=c(0,1,2)) +
+  labs(title="Top 10 Victims: Number of Shootings with Mental Health Issues per Year") + 
+  theme(axis.text.x=element_text(angle=90)) +
+  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  theme(legend.position="bottom")
+
+ggplot(top10Total.victims, aes(x = Month), groupName='Mental.Health.Issues') + 
+  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
+  scale_y_continuous(breaks=c(0,1,2)) +
+  labs(title="Top 10 Victims: Number of Shootings with Mental Health Issues per Month") +
+  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  theme(legend.position="bottom")
+```
+
+
+```{r}
+formattable(top10Total.victims, list(
+  Fatalities = color_tile("transparent", "coral"),
+  Injured = color_tile("transparent", "springgreen"),
+  Total.victims = color_tile("transparent", "violet")))
+```
 
 ```{r}
 
