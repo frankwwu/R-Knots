@@ -31,6 +31,7 @@ shoot[shoot$Mental.Health.Issues=="Unclear",]$Mental.Health.Issues<-"Unknown"
 shoot[shoot$Mental.Health.Issues=="unknown",]$Mental.Health.Issues<-"Unknown"
 ```
 
+## ## Number of Shootings per Year
 
 ```{r}
 ggplot(shoot, aes(x = Year)) + 
@@ -39,6 +40,7 @@ ggplot(shoot, aes(x = Year)) +
   theme(legend.position="none", axis.text.x=element_text(angle=90))
 ```
 
+## Number of Shootings with Mental Health Issues per Year
 
 ```{r}
 ggplot(shoot, aes(x = Year), groupName='Mental.Health.Issues') + 
@@ -49,6 +51,7 @@ ggplot(shoot, aes(x = Year), groupName='Mental.Health.Issues') +
   theme(legend.position="bottom")
 ```
 
+## Number of Shootings with Mental Health Issues per Month
 
 ```{r}
 ggplot(shoot, aes(x = Month), groupName='Mental.Health.Issues') + 
@@ -59,59 +62,32 @@ ggplot(shoot, aes(x = Month), groupName='Mental.Health.Issues') +
 ```
 
 
+## Top 10 Fatalities Shootings
+
 ```{r}
 top10Fatalities <- shoot %>% filter(rank(desc(Fatalities)) <= 10)
-
-ggplot(top10Fatalities, aes(x = Year), groupName='Mental.Health.Issues') + 
-  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
-  scale_y_continuous(breaks=c(0,1,2)) +
-  labs(title="Top 10 Fatalities: Number of Shootings with Mental Health Issues per Year") + 
-  theme(axis.text.x=element_text(angle=90)) +
-  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
-  theme(legend.position="bottom")
-
-ggplot(top10Fatalities, aes(x = Month), groupName='Mental.Health.Issues') + 
-  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
-  scale_y_continuous(breaks=c(0,1,2)) +
-  labs(title="Top 10 Fatalities: Number of Shootings with Mental Health Issues per Month") +
-  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
-  theme(legend.position="bottom")
+top10Fatalities <- top10Fatalities[order(-top10Fatalities$Fatalities),]
+formattable(top10Fatalities[ c("Location", "Date", "Fatalities", "Injured", "Total.victims", "Mental.Health.Issues")], list(
+  Fatalities = color_bar("coral"),
+  Injured = color_bar("springgreen"),
+  Total.victims = color_bar("violet"),
+  Mental.Health.Issues = formatter("span", style = x ~ ifelse(x == "Yes", style(color = "red", font.weight = "bold"), NA))))
 ```
 
-```{r}
-formattable(top10Fatalities, list(
-  Fatalities = color_tile("transparent", "coral"),
-  Injured = color_tile("transparent", "springgreen"),
-  Total.victims = color_tile("transparent", "violet")))
-```
+
+## Top 10 Victims Shootings
 
 ```{r}
 top10Total.victims <- shoot %>% filter(rank(desc(Total.victims)) <= 10)
-
-ggplot(top10Total.victims, aes(x = Year), groupName='Mental.Health.Issues') + 
-  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
-  scale_y_continuous(breaks=c(0,1,2)) +
-  labs(title="Top 10 Victims: Number of Shootings with Mental Health Issues per Year") + 
-  theme(axis.text.x=element_text(angle=90)) +
-  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
-  theme(legend.position="bottom")
-
-ggplot(top10Total.victims, aes(x = Month), groupName='Mental.Health.Issues') + 
-  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
-  scale_y_continuous(breaks=c(0,1,2)) +
-  labs(title="Top 10 Victims: Number of Shootings with Mental Health Issues per Month") +
-  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
-  theme(legend.position="bottom")
-```
-
-
-```{r}
-formattable(top10Total.victims, list(
-  Fatalities = color_tile("transparent", "coral"),
-  Injured = color_tile("transparent", "springgreen"),
-  Total.victims = color_tile("transparent", "violet")))
+top10Total.victims <- top10Total.victims[order(-top10Total.victims$Total.victim),]
+formattable(top10Total.victims[ c("Location", "Date", "Fatalities", "Injured", "Total.victims", "Mental.Health.Issues")], list(
+  Fatalities = color_bar("coral"),
+  Injured = color_bar("springgreen"),
+  Total.victims = color_bar("violet"),
+  Mental.Health.Issues = formatter("span", style = x ~ ifelse(x == "Yes", style(color = "red", font.weight = "bold"), NA))))
 ```
 
 ```{r}
-
+a <- shoot[ c("Date", "Fatalities", "Total.victims")]
+head(a)
 ```
