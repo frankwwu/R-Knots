@@ -1,0 +1,70 @@
+---
+title: "80 Cereals"
+output: html_notebook
+---
+
+
+```{r, include=FALSE}
+library(RCurl)
+library(ggplot2)
+```
+
+**mfr: Manufacturer of cereal**
+
+A = American Home Food Products
+
+G = General Mills
+
+K = Kelloggs
+
+N = Nabisco
+
+P = Post
+
+Q = Quaker Oats
+
+R = Ralston Purina
+
+
+**type:**
+
+cold
+
+hot
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/80%20Cereals/cereal.csv')
+cereals <- read.csv(text = url) 
+```
+
+```{r}
+string <- cereals[1, ]
+head(string)
+cereals = cereals[-1,]
+head(cereals)
+```
+
+```{r, message=FALSE, warning=FALSE}
+mfr <- unique(cereals$mfr)
+print(paste(len(mfr), 'mfr'))
+print(mfr)
+
+ggplot() + 
+geom_point(cereals, mapping=aes(x=protein, y=fiber, color=mfr, size=fat)) +
+  facet_grid(. ~ type) +
+  labs(x="Protein", y="Fiber")
+```
+
+```{r}
+cereals$sugars <- as.integer(as.character(cereals$sugars))
+cereals$calories <- as.integer(as.character(cereals$calories))
+cereals$rating <- as.numeric(as.character(cereals$rating))
+min(cereals$calories, na.rm = TRUE)
+max(cereals$calories, na.rm = TRUE)
+
+ggplot(data=cereals, aes(x=sugars, y=calories, col=rating)) +
+  geom_jitter() +
+  labs(x="Sugar", y="Calories") +
+  geom_smooth(method="lm", se=FALSE)+
+  scale_color_distiller(palette = "RdPu")
+```
