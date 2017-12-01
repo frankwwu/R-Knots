@@ -1,16 +1,17 @@
 ---
-title: "Demystifying Cereal Nutrition Facts"
+title: "How Cereal Manufacturers Mislead Consumers?"
 output: 
   html_document:
     keep_md: yes
 ---
 
-If you like to eat cereal and pay attention to the nutrition facts, you probably already have been misled. Manufacturers measure cereal nutrition by serving. However, most people in real life measure cereal by volume, for example, by cup. A serving can mean different cups depending on manufacturers and the type of cereal. This makes nutrition facts on cereal boxes are hard to understand, and ever misleading. This project compares cereal nutrition by serving and by cup, and attempt to work out a meaningful way to compare difference cereal nutrition.
+If you like to eat cereal and pay attention to the nutrition facts, you probably already have been misled. Manufacturers measure cereal nutrition by serving. However, most people in real life measure cereal by volume, for example, by cup. A serving can mean different volume or weight depending on manufacturers and the type of cereal. They are not directly compariable. This makes nutrition facts on cereal boxes hard to understand, and ever misleading. This analysis compares cereal nutrition measured by serving and by cup, and attempt to work out a meaningful way to compare difference cereal nutrition.
 
 ```{r, message=FALSE, warning=FALSE}
 library(RCurl)
 library(ggplot2)
 library(gridExtra)
+library(formattable)
 ```
 
 ## Context Notation
@@ -34,11 +35,11 @@ R = Ralston Purina
 
 **type:**
 
-cold
+C = Cold
 
-hot
+H = Hot
 
-For detail, check out https://www.kaggle.com/crawford/80-cereals
+For full notation, see https://www.kaggle.com/crawford/80-cereals
 
 ## Loading data
 
@@ -58,6 +59,8 @@ head(cereals)
 
 ## How do manufacturers measure nutrition?
 
+In `r length(unique(cereals$mfr))` cereal manufacturers, a serving can mean `r length(unique(cereals$weight))` different weight, or `r length(unique(cereals$cups))` different cups. What a mess! Comparing nutrition by serving alone is pointless!
+
 ```{r, message=FALSE, warning=FALSE}
 mfr <- unique(cereals$mfr)
 print(paste(length(mfr), 'manufacturers'))
@@ -74,7 +77,7 @@ print(cups)
 
 ## Measure nutrition by serving
 
-Manufacturers like to measure nutrition with serving. Every manufacturer chaotically defines the serving with different weights and cups. Thus, for consumers, comparing nutrition measured with different serving is practically very confusing. Imagine you are comparing nutrition facts of different cereals in a grocery store and they are measured with different serving, you definitely need a calculator and a piece of paper.
+Manufacturers like to measure nutrition with serving. Every manufacturer chaotically defines the serving with different weights and cups. Thus, for consumers, comparing nutrition measured with different serving is very confusing in practice. Imagine you are comparing nutrition facts of different cereals in a grocery store and they are measured with different serving, you definitely need a calculator and a piece of paper.
 
 ```{r, message=FALSE, warning=FALSE}
 cereals$calories <- as.integer(as.character(cereals$calories))
@@ -94,7 +97,7 @@ cereals$rating <- as.numeric(as.character(cereals$rating))
 
 ```{r, message=FALSE, warning=FALSE}
 ggplot() + 
-  geom_point(cereals, mapping=aes(x=mfr, y=weight, color=mfr)) +
+  geom_point(cereals, mapping=aes(x=mfr, y=weight, color=mfr, size=3)) +
   labs(x="Manufacturer", y="Ounce") +
   ggtitle("Manufacturers use Different Weights for One Serving")
 ```
@@ -102,7 +105,7 @@ ggplot() +
 
 ```{r, message=FALSE, warning=FALSE}
 ggplot() + 
-  geom_point(cereals, mapping=aes(x=mfr, y=cups, color=mfr)) +
+  geom_point(cereals, mapping=aes(x=mfr, y=cups, color=mfr, size=3)) +
   labs(x="Manufacturer", y="Cup") +
   ggtitle("Manufacturers use Different Cups for One Serving")
 ```
@@ -118,6 +121,7 @@ Convert nutrition to per cup.
 ```{r}
 # Normalize with cup
 cereals.cup <- data.frame( 
+  name = cereals$name,
   mfr = cereals$mfr,
   type = cereals$type,
   calories= round(as.numeric(cereals$calories) / as.numeric(cereals$cups)),
@@ -142,15 +146,16 @@ plot_protein_fiber <- function(cereals, xlim, ylim, title){
     geom_point(cereals, mapping=aes(x=protein, y=fiber, color=mfr, size=fat, shape=type)) +
     coord_cartesian(xlim=xlim, ylim=ylim) +
     labs(x="Protein", y="Fiber") +
-    ggtitle(title)
+    ggtitle(title) +
+    theme(legend.position="bottom")
 }
 
-plot1 <- plot_protein_fiber(cereals, c(0, 12.5), c(0, 30), "Protein vs. Fiber vs. Types per Serving")
-plot2 <- plot_protein_fiber(cereals.cup, c(0, 12.5), c(0, 30), "Protein vs. Fiber vs. Types per Cup")
+plot1 <- plot_protein_fiber(cereals, c(0, 12), c(0, 30), "Protein vs. Fiber vs. Types per Serving")
+plot2 <- plot_protein_fiber(cereals.cup, c(0, 12), c(0, 30), "Protein vs. Fiber vs. Types per Cup")
 grid.arrange(plot1, plot2, ncol=2)
 ```
 
-Calories per serving and per cup are obversely different.
+Calories per serving and per cup are obviously different.
 
 ```{r}
 cat("Range of calories per weight:", min(cereals$calories, na.rm = TRUE), "-", max(cereals$calories, na.rm = TRUE), "\n")
@@ -168,11 +173,12 @@ plot_sugars_calories <- function(cereals, xlim, ylim, title){
     coord_cartesian(xlim=xlim, ylim=ylim) +
     geom_smooth(method="lm", se=FALSE, col="grey") +
     scale_color_gradient(low="blue", high="red") +
-    ggtitle(title)
+    ggtitle(title) +
+    theme(legend.position="bottom")
 }
 
-plot1 <- plot_sugars_calories(cereals, c(0, 25), c(0, 450), "Sugar vs. Calories per Serving")
-plot2 <- plot_sugars_calories(cereals.cup, c(0, 25), c(0, 450), "Sugar vs. Calories per Cup")
+plot1 <- plot_sugars_calories(cereals, c(0, 22), c(0, 450), "Sugar vs. Calories per Serving")
+plot2 <- plot_sugars_calories(cereals.cup, c(0, 22), c(0, 450), "Sugar vs. Calories per Cup")
 grid.arrange(plot1, plot2, ncol=2)
 ```
 
@@ -186,18 +192,22 @@ plot_sugars_sodium <- function(cereals, xlim, ylim, title){
     labs(x="Sugar", y="Sodium") +
     coord_cartesian(xlim=xlim, ylim=ylim) +
     scale_color_gradient(low="blue", high="red") +
-    ggtitle(title)
+    ggtitle(title) +
+    theme(legend.position="bottom")
 }
 
-plot1 <- plot_sugars_sodium(cereals, c(0, 25), c(0, 800), "Sugar vs. Sodium per Serving")
-plot2 <- plot_sugars_sodium(cereals.cup, c(0, 25), c(0, 800), "Sugar vs. Sodium per Cup")
+plot1 <- plot_sugars_sodium(cereals, c(0, 22), c(0, 800), "Sugar vs. Sodium per Serving")
+plot2 <- plot_sugars_sodium(cereals.cup, c(0, 22), c(0, 800), "Sugar vs. Sodium per Cup")
 grid.arrange(plot1, plot2, ncol=2)
 ```
 
-For simplicity, let's combine good and bad nutrition, and examine the difference.
+## Combined nutrition
+
+Let's combine good and bad nutrition, and examine the difference. For simplicity, no weight is applied to each component.
 
 ```{r}
 cereals.per.serving <- data.frame( 
+  name = cereals$name,
   mfr = cereals$mfr,
   good = cereals$protein + cereals$fiber + cereals$vitamins,
   bad = cereals$fat + cereals$sodium + cereals$potass + cereals$sugars,
@@ -205,6 +215,7 @@ cereals.per.serving <- data.frame(
 )
 
 cereals.per.cup <- data.frame( 
+  name = cereals.cup$name,
   mfr = cereals.cup$mfr,
   good = cereals.cup$protein + cereals.cup$fiber + cereals.cup$vitamins,
   bad = cereals.cup$fat + cereals.cup$sodium + cereals.cup$potass + cereals.cup$sugars,
@@ -217,10 +228,11 @@ plot_combined <- function(cereals, xlim, ylim, title){
   ggplot(data=cereals, aes(x=bad, y=good, col=rating)) +
     geom_jitter() +
     geom_text(aes(label=mfr),hjust=0, vjust=0) +
-    labs(x="Bad", y="Good") +
+    labs(x="Bad (fat, sodium, potass, sugars)", y="Good (protein, fiber, vitamins)") +
     coord_cartesian(xlim=xlim, ylim=ylim) +
     scale_color_gradient(low="blue", high="red") +
-    ggtitle(title)
+    ggtitle(title) +
+    theme(legend.position="bottom")
 }
 
 plot1 <- plot_combined(cereals.per.serving, c(0, 1300), c(0, 150), "Combined Nutrition per Serving")
@@ -228,6 +240,22 @@ plot2 <- plot_combined(cereals.per.cup, c(0, 1300), c(0, 150), "Combined Nutriti
 grid.arrange(plot1, plot2, ncol=2)
 ```
 
-## Conclution
+## Ranking by combined good nutrition per cup (the higher, the better)
 
-Measuring nutrition by different serving is a mystery. It is almost impossible to quickly compare nutrition facts when you are shopping in a grocery store.
+```{r}
+formattable(cereals.per.cup[order(-cereals.per.cup$good),], list(
+  good = color_bar("springgreen"),
+  bad = color_bar("coral")))
+```
+
+## Ranking by combined bad nutrition per cup (the higher, the worse)
+
+```{r}
+formattable(cereals.per.cup[order(-cereals.per.cup$bad),], list(
+  good = color_bar("springgreen"),
+  bad = color_bar("coral")))
+```
+
+## Conclusions
+
+Measuring nutrition by different serving is a mystery. It is almost impossible to quickly compare nutrition facts when you are shopping in a grocery store. Furthermore, the product rating is meaningless for nutrition comparison.
