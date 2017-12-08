@@ -1,11 +1,12 @@
 ---
 title: "US Mass Shootings"
 output: 
-  html_notebook
+  html_document:
+    keep_md: yes
 ---
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(RCurl)
 library(lubridate)
 library(gridExtra)
@@ -29,6 +30,17 @@ shoot$Year <- factor(year(as.Date(shoot$Date, format = "%m/%d/%Y")))
 str(shoot)
 shoot[shoot$Mental.Health.Issues=="Unclear",]$Mental.Health.Issues<-"Unknown"
 shoot[shoot$Mental.Health.Issues=="unknown",]$Mental.Health.Issues<-"Unknown"
+shoot[shoot$Race=="",]$Race<-"Unknown"
+shoot[shoot$Race=="White American or European American",]$Race<-"White"
+shoot[shoot$Race=="White American or European American/Some other Race",]$Race<-"White"
+shoot[shoot$Race=="white",]$Race<-"White"
+shoot[shoot$Race=="Black American or African American/Unknown",]$Race<-"Black"
+shoot[shoot$Race=="Black American or African American",]$Race<-"Black"
+shoot[shoot$Race=="black",]$Race<-"Black"
+shoot[shoot$Race=="Asian American",]$Race<-"Asian"
+shoot[shoot$Race=="Asian American/Some other race",]$Race<-"Asian"
+shoot[shoot$Race=="Native American or Alaska Native",]$Race<-"Native"
+shoot[shoot$Race=="Some other race",]$Race<-"Other"
 ```
 
 ## ## Number of Shootings per Year
@@ -62,6 +74,17 @@ ggplot(shoot, aes(x = Month), groupName='Mental.Health.Issues') +
 ```
 
 
+```{r}
+ggplot(shoot, aes(x = Month, y = Total.victims, fill=Mental.Health.Issues)) + 
+  geom_violin() +
+  scale_y_continuous(trans='log10') +
+  facet_grid(. ~ Mental.Health.Issues) +   
+  labs(title="Density of Shootings with Mental Health Issues per Month") +
+  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  theme(legend.position="bottom")
+```
+
+
 ## Top 10 Fatalities Shootings
 
 ```{r}
@@ -87,7 +110,15 @@ formattable(top10Total.victims[ c("Location", "Date", "Fatalities", "Injured", "
   Mental.Health.Issues = formatter("span", style = x ~ ifelse(x == "Yes", style(color = "red", font.weight = "bold"), NA))))
 ```
 
+## Number of Shootings Grouped by Race
+
 ```{r}
-a <- shoot[ c("Date", "Fatalities", "Total.victims")]
-head(a)
+ggplot(shoot, aes(x = Race), groupName='Mental.Health.Issues') + 
+  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
+  labs(title="Number of Shootings with Mental Health Issues per Race") + 
+  theme(axis.text.x=element_text(angle=45)) +
+  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  theme(legend.position="bottom")
 ```
+
+
