@@ -13,6 +13,7 @@ library(formattable)
 # This does not Work.
 
 ```{r}
+withVisible(
 for (i in 1:5)
 {
   print(i)
@@ -20,7 +21,7 @@ for (i in 1:5)
   cat('\n')
   plot(pressure)
   cat('\n')
-}
+})
 ```
 
 # This does not Work, too.

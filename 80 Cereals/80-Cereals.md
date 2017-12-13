@@ -5,7 +5,10 @@ output:
     keep_md: yes
 ---
 
-If you like to eat cereal and pay attention to the nutrition facts, you probably already have been misled. Manufacturers measure cereal nutrition by serving. However, most people in real life measure cereal by volume, for example, by cup. A serving can mean different volume or weight depending on manufacturers and the type of cereal. They are not directly compariable. This makes nutrition facts on cereal boxes hard to understand, and ever misleading. This analysis compares cereal nutrition measured by serving and by cup, and attempt to work out a meaningful way to compare difference cereal nutrition.
+If you like to eat cereal and pay attention to the nutrition facts, you probably already have been misled. The nutrition displayed on the cereal boxes is measured by serving, which is not a standardized unit. Each manufacturer has its own definition of serving. Further, the same manufacturer can have different definition of serving for different cereals. Therefore, a serving can mean different volume or weight depending on manufacturers and the type of cereal. They are not directly comparable. This makes nutrition facts on cereal boxes hard to understand, and ever misleading.
+
+I asked about 20 people how they measure cereal. It turns out they all measure with volume, for example, by cup, by bowl, by hand, by visual observation, etc. None of them measure cereal by serving or by weight. This analysis compares cereal nutrition measured by serving and by cup, and attempt to work out a meaningful way to compare different cereal nutrition.
+
 
 
 ```r
@@ -303,7 +306,7 @@ grid.arrange(plot1, plot2, ncol=2)
 
 ## Combined nutrition
 
-Let's combine good and bad nutrition, and examine the difference. For simplicity, no weight is applied to each component.
+Let's combine good and bad nutrition respectively, and examine the difference. For simplicity, no weight is applied to each component.
 
 
 ```r

@@ -1,0 +1,108 @@
+---
+title: "Keras for R"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+```{r setup, include=FALSE}
+library(keras)
+library(ggplot2)
+library(imager)
+library(flip)
+```
+
+
+```{r}
+# get MNIST dataset
+mnist <- dataset_mnist()
+x_train <- mnist$train$x
+y_train <- mnist$train$y
+x_test <- mnist$test$x
+y_test <- mnist$test$y
+
+# input image dimensions
+img_rows <- 28
+img_cols <- 28
+```
+
+```{r}
+# display a few training images
+par(mfrow=c(1,3),pty='s',mar=c(0,2,0,2))
+for (i in c(1,2,3)){
+  m = matrix(unlist(x_train[i,,]), nrow = 28, byrow = TRUE)
+  image(m, col=grey.colors(255), ylim=c(1, 0))
+}
+```
+
+```{r}
+input_shape = img_rows * img_cols
+
+# convert the 3-d arrays into matrices. 28x28 images are flattened into length 784 vectors.
+dim(x_train) <- c(nrow(x_train), input_shape)
+dim(x_test) <- c(nrow(x_test), input_shape)
+
+# convert the grayscale values from integers ranging between 0 to 255 into floating point values ranging between 0 and 1.
+x_train <- x_train / 255
+x_test <- x_test / 255
+
+x_train.shape[0]
+x_test.shape[0]
+```
+
+
+```{r}
+# one-hot encode the y integer vectors into binary class matrices
+num_classes = 10
+y_train <- to_categorical(y_train, num_classes)
+y_test <- to_categorical(y_test, num_classes)
+```
+
+
+```{r}
+model <- keras_model_sequential() 
+model %>% 
+  layer_dense(units = 256, activation = "relu", input_shape = c(784)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 128, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 10, activation = "softmax")
+```
+
+
+```{r}
+summary(model)
+```
+
+```{r}
+# compile the model with appropriate loss function, optimizer, and metrics
+model %>% compile(loss = "categorical_crossentropy", optimizer = optimizer_rmsprop(), metrics = c("accuracy"))
+```
+
+```{r}
+# Use the fit() function to train the model for 10 epochs using batches of 128 images
+history <- model %>% fit(x_train, y_train, epochs = 15, batch_size = 128, validation_split = 0.2)
+```
+
+```{r}
+plot(history)
+```
+
+```{r}
+# Evaluate the model's performance on the test data:
+model %>% evaluate(x_test, y_test,verbose = 0)
+```
+
+```{r}
+# Generate predictions on new data:
+model %>% predict_classes(x_test)
+```
+
+```{r}
+par(mfrow=c(1,3),pty='s',mar=c(0,2,0,2))
+for (i in c(1,2,3)){
+  m = matrix(unlist(x_test[i,]), nrow = 28, byrow = TRUE)
+  image(m, col=grey.colors(255), ylim=c(1, 0))
+}
+```

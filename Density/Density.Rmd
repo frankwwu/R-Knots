@@ -5,7 +5,7 @@ output:
     keep_md: yes
 ---
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 library(datasets)
 library(ggplot2)
 library(gridExtra)

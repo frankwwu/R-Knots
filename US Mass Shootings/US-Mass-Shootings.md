@@ -76,12 +76,12 @@ shoot[shoot$Race=="Native American or Alaska Native",]$Race<-"Native"
 shoot[shoot$Race=="Some other race",]$Race<-"Other"
 ```
 
-## ## Number of Shootings per Year
+## Number of Shootings per Year
 
 
 ```r
 ggplot(shoot, aes(x = Year)) + 
-  geom_bar(aes(fill = Year), width = 0.5) +
+  geom_bar(aes(fill = Year), width = 0.8) +
   labs(title="Number of Shootings per Year") + 
   theme(legend.position="none", axis.text.x=element_text(angle=90))
 ```
@@ -93,7 +93,7 @@ ggplot(shoot, aes(x = Year)) +
 
 ```r
 ggplot(shoot, aes(x = Year), groupName='Mental.Health.Issues') + 
-  geom_bar(aes(fill = Mental.Health.Issues), width = 0.5) +
+  geom_bar(aes(fill = Mental.Health.Issues), width = 0.8) +
   labs(title="Number of Shootings with Mental Health Issues per Year") + 
   theme(axis.text.x=element_text(angle=90)) +
   scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
@@ -118,12 +118,13 @@ ggplot(shoot, aes(x = Month), groupName='Mental.Health.Issues') +
 
 
 ```r
-ggplot(shoot, aes(x = Month, y = Total.victims, fill=Mental.Health.Issues)) + 
-  geom_violin() +
+ggplot(shoot, aes(x = Month, y = Total.victims, fill=Mental.Health.Issues, color=Mental.Health.Issues)) + 
+  geom_boxplot() +
   scale_y_continuous(trans='log10') +
   facet_grid(. ~ Mental.Health.Issues) +   
-  labs(title="Density of Shootings with Mental Health Issues per Month") +
-  scale_fill_manual (values=c("#0275D2", "#00E699", "#FB008A")) +
+  labs(title="Density of Victims with Mental Health Issues per Month") +
+  scale_fill_manual (values=c("#0275D2", "#00C679", "#FB008A")) +
+  scale_color_manual (values=c("#0275D2", "#00C679", "#FB008A")) +
   theme(legend.position="bottom")
 ```
 

@@ -1,0 +1,21 @@
+---
+title: "Consecutive Up Down"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r warning=FALSE, message=FALSE}
+library(lubridate)
+library(ggplot2)
+```
+
+```{r}
+uri <- "https://ichart.finance.yahoo.com/table.csv?s=^ixic&a=0&b=2&c=2010&d=0&e=2&f=2020&g=d"
+df <- read.csv(uri)
+
+head(df)
+
+#convert the 'Date' from a string to a Date type
+#df$Date <- as.Date(df$Date, "%Y-%m-%d")
+```
