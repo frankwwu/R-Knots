@@ -1,0 +1,55 @@
+---
+title: "Outliers"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+The dataset is downloaded from Yahoo Finance, https://finance.yahoo.com/quote/UOPIX
+
+
+```{r warning=FALSE, message=FALSE}
+library(RCurl)
+library(ggplot2)
+```
+
+```{r}
+url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Outliers/UOPIX-Outliers.csv')
+UOPIX <- read.csv(text = url) 
+```
+
+```{r}
+UOPIX$Date=as.Date(UOPIX$Date)
+UOPIX$ID <- seq.int(nrow(UOPIX))
+```
+
+```{r}
+ggplot(data = UOPIX, aes(x=Date, y=Adj.Close)) +
+  geom_point(color='brown1')
+```
+
+```{r}
+outlier_values <- boxplot.stats(UOPIX$Adj.Close, coef = 2)$out
+outlier_values
+```
+
+```{r}
+min <- min(outlier_values)
+outliers <- UOPIX[UOPIX$Adj.Close >= min,]
+outliers
+
+rows <- nrow(outliers)
+for (r in 1:rows){
+  cur <- outliers[r,]$ID
+  prev <- outliers[r,]$ID - 1
+  UOPIX[UOPIX$ID == cur,]$Adj.Close <- UOPIX[UOPIX$ID == prev,]$Adj.Close
+}
+
+UOPIX[UOPIX$Adj.Close >= min,]
+```
+
+
+```{r}
+ggplot(data = UOPIX, aes(x=Date, y=Adj.Close)) +
+  geom_point(color='brown1')
+```
