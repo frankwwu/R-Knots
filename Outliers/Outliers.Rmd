@@ -11,6 +11,9 @@ The dataset is downloaded from Yahoo Finance, https://finance.yahoo.com/quote/UO
 ```{r warning=FALSE, message=FALSE}
 library(RCurl)
 library(ggplot2)
+library(plotly)
+library(tidyverse)
+library(outliers)
 ```
 
 ```{r}
@@ -29,8 +32,42 @@ ggplot(data = UOPIX, aes(x=Date, y=Adj.Close)) +
 ```
 
 ```{r}
-outlier_values <- boxplot.stats(UOPIX$Adj.Close, coef = 2)$out
+ggplot(data = UOPIX, aes(x=Date, y=Adj.Close)) +
+  geom_violin(color='brown1')
+```
+
+```{r}
+outlier_scores <- scores(UOPIX$Adj.Close)
+```
+
+```{r}
+is_outlier <- outlier_scores > 3 | outlier_scores < -3
+
+# Add a column with info whether the refund_value is an outlier
+UOPIX$is_outlier <- is_outlier
+```
+
+```{r}
+ggplot(UOPIX, aes(UOPIX$Date, UOPIX$Adj.Close)) +
+    geom_point(aes(color = UOPIX$is_outlier)) +
+    facet_wrap(~is_outlier)
+```
+
+```{r}
+ggplot(UOPIX, aes(Date, UOPIX$Adj.Close)) +
+    geom_violin(aes(color = UOPIX$is_outlier)) +
+    facet_wrap(~is_outlier)
+```
+
+```{r}
+outlier_values <- boxplot.stats(UOPIX$Adj.Close, coef = 3)$out
 outlier_values
+```
+
+```{r}
+UOPIX_outliers <- UOPIX[outlier_scores > 3| outlier_scores < -3, ]
+nrow(UOPIX_outliers)
+head(UOPIX_outliers)
 ```
 
 ```{r}
@@ -38,6 +75,7 @@ min <- min(outlier_values)
 outliers <- UOPIX[UOPIX$Adj.Close >= min,]
 outliers
 
+# Replace with the previous value
 rows <- nrow(outliers)
 for (r in 1:rows){
   cur <- outliers[r,]$ID
@@ -48,8 +86,31 @@ for (r in 1:rows){
 UOPIX[UOPIX$Adj.Close >= min,]
 ```
 
+```{r}
+ggplot(UOPIX, aes(UOPIX$Date, UOPIX$Adj.Close)) +
+    geom_point(aes(color = UOPIX$is_outlier)) +
+    facet_wrap(~is_outlier)
+
+ggplot(UOPIX, aes(UOPIX$Date, UOPIX$Adj.Close)) +
+    geom_point(aes(color = UOPIX$is_outlier))
+```
 
 ```{r}
-ggplot(data = UOPIX, aes(x=Date, y=Adj.Close)) +
-  geom_point(color='brown1')
+ggplot(UOPIX, aes(Date, UOPIX$Adj.Close)) +
+    geom_violin(aes(color = UOPIX$is_outlier)) +
+    facet_wrap(~is_outlier)
 ```
+
+```{r}
+# Replace outliers with NA
+UOPIX[outlier_scores > 3 | outlier_scores < -3, ]$Adj.Close <- NA
+summary(UOPIX$Adj.Close)
+```
+
+```{r}
+ggplot(UOPIX, aes(UOPIX$Date, UOPIX$Adj.Close)) +
+    geom_point(aes(color = UOPIX$is_outlier)) +
+    facet_wrap(~is_outlier)
+```
+
+
