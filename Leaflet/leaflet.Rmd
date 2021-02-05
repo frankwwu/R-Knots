@@ -1,0 +1,41 @@
+---
+title: "Ontario House Mean Prices"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+
+```{r, message=FALSE, warning=FALSE}
+library(leaflet)
+library(dplyr)
+```
+
+
+```{r}
+properties <- read.csv(file = 'https://gist.githubusercontent.com/frankwwu/c9b3335db7a7afbbeda2b08b4bf6581b/raw/f4f95142b263e97e6fcb019d5b6f074240460a45/properties.csv') 
+```
+
+
+```{r}
+properties <- properties[properties$Price < 500000 & properties$Price > 200000,]
+head(properties)
+```
+
+```{r}
+pal <- colorNumeric(c("brown", "red", "yellow", "green", "blue"), domain = properties$Price)
+
+summary(properties)
+ 
+leaflet() %>%
+  setView(lng = -79.4048, lat = 44.3, zoom = 7) %>%
+  addProviderTiles("Esri.WorldStreetMap") %>%
+  addCircles(
+    data = properties,
+    radius = 10,
+    color = ~pal(Price),
+    fillColor = ~pal(Price),
+    fillOpacity = 0.25, popup = paste("$", properties$Price, "<br>", properties$AreaName)
+  ) 
+```
+
