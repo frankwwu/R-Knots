@@ -1,0 +1,87 @@
+---
+title: "Customer Segmentation"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+```{r}
+library(cluster)
+library(ggplot2)
+```
+
+
+```{r}
+dataset<-read.csv('Mall_Customers.csv')
+head(dataset)
+```
+
+```{r}
+summary(dataset)
+```
+
+```{r}
+ggplot(data = dataset, aes(x = 'Annual Income (k$)', y = Age, fill = Genre)) + 
+        geom_violin()
+```
+
+```{r}
+male <- subset(dataset, Genre == "Male")[4:5]
+female <- subset(dataset, Genre == "Female")[4:5]
+```
+
+
+```{r}
+set.seed(12)
+wcss<-vector()
+
+for(i in 1:10) 
+        wcss[i]<- sum(kmeans(male, i)$withinss)
+plot(1:10, wcss, type="b", main=paste('Clusters vs. WCSS'),xlab='Number of Clusters for Male', ylab='Within Cluster Sum of Squares (WCSS)')
+```
+
+```{r}
+for(i in 1:10) 
+        wcss[i]<- sum(kmeans(female, i)$withinss)
+plot(1:10, wcss, type="b", main=paste('Clusters vs. WCSS'),xlab='Number of Clusters for Female', ylab='Within Cluster Sum of Squares (WCSS)')
+```
+
+
+```{r}
+set.seed(29)
+kmeans_male<-kmeans(male, 5,iter.max=300, nstart=10)
+```
+
+```{r}
+kmeans_female<-kmeans(female, 5,iter.max=300, nstart=10)
+```
+
+
+```{r}
+clusplot(male,
+        kmeans_male$cluster,
+        lines = 0,
+        shade = TRUE,
+        color = TRUE,
+        labels = 2,
+        plotchar = FALSE,
+        span = TRUE,
+        main = paste('Cluster of Female Customers'),
+        xlab = 'Annual Income',
+        ylab = 'Spending Score')
+```
+
+```{r}
+clusplot(female,
+        kmeans_female$cluster,
+        lines = 0,
+        shade = TRUE,
+        color = TRUE,
+        labels = 2,
+        plotchar = FALSE,
+        span = TRUE,
+        main = paste('Cluster of Female Customers'),
+        xlab = 'Annual Income',
+        ylab = 'Spending Score')
+```
