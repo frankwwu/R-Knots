@@ -14,7 +14,7 @@ library(ggplot2)
 
 
 ```r
-dataset<-read.csv('Mall_Customers.csv')
+dataset <- read.csv('Mall_Customers.csv')
 head(dataset)
 ```
 
@@ -79,11 +79,11 @@ female <- subset(dataset, Genre == "Female")[4:5]
 
 ```r
 set.seed(12)
-wcss<-vector()
+wcss <- vector()
 
 for(i in 1:10) 
-  wcss[i]<- sum(kmeans(male, i)$withinss)
-plot(1:10, wcss, type="b", main=paste('Clusters vs. WCSS'),xlab='Number of Clusters for Male', ylab='Within Cluster Sum of Squares (WCSS)')
+  wcss[i] <- sum(kmeans(male, i)$withinss)
+plot(1:10, wcss, type = "b", main = 'Clusters vs. WCSS', xlab = 'Number of Clusters for Male', ylab = 'Within Cluster Sum of Squares (WCSS)')
 ```
 
 ![](Customer-Segmentation_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
@@ -91,15 +91,15 @@ plot(1:10, wcss, type="b", main=paste('Clusters vs. WCSS'),xlab='Number of Clust
 
 ```r
 for(i in 1:10) 
-  wcss[i]<- sum(kmeans(female, i)$withinss)
-plot(1:10, wcss, type="b", main=paste('Clusters vs. WCSS'),xlab='Number of Clusters for Female', ylab='Within Cluster Sum of Squares (WCSS)')
+  wcss[i] <- sum(kmeans(female, i)$withinss)
+plot(1:10, wcss, type = "b", main = 'Clusters vs. WCSS', xlab = 'Number of Clusters for Female', ylab = 'Within Cluster Sum of Squares (WCSS)')
 ```
 
 ![](Customer-Segmentation_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 
 ```r
-kmeans_male<-kmeans(male, 5,iter.max=300, nstart=10)
+kmeans_male <- kmeans(male, 5, iter.max = 300, nstart = 10)
 kmeans_male
 ```
 
@@ -138,7 +138,7 @@ kmeans_male
 
 
 ```r
-kmeans_female<-kmeans(female, 5,iter.max=300, nstart=10)
+kmeans_female <- kmeans(female, 5, iter.max = 300, nstart = 10)
 kmeans_female
 ```
 
@@ -187,7 +187,7 @@ clusplot(male,
         labels = 2,
         plotchar = FALSE,
         span = TRUE,
-        main = 'Cluster of Female Customers',
+        main = 'Cluster of Male Customers',
         xlab = 'Annual Income',
         ylab = 'Spending Score')
 ```
@@ -222,11 +222,11 @@ female <- subset(dataset, Genre == "Female")[3:5]
 
 ```r
 set.seed(24)
-wcss<-vector()
+wcss <- vector()
 
 for(i in 1:10) 
-  wcss[i]<- sum(kmeans(male, i)$withinss)
-plot(1:10, wcss, type="b", main=paste('Clusters vs. WCSS'),xlab='Number of Clusters for Male', ylab='Within Cluster Sum of Squares (WCSS)')
+  wcss[i] <- sum(kmeans(male, i)$withinss)
+plot(1:10, wcss, type = "b", main = 'Clusters vs. WCSS', xlab = 'Number of Clusters for Male', ylab = 'Within Cluster Sum of Squares (WCSS)')
 ```
 
 ![](Customer-Segmentation_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
@@ -234,15 +234,15 @@ plot(1:10, wcss, type="b", main=paste('Clusters vs. WCSS'),xlab='Number of Clust
 
 ```r
 for(i in 1:10) 
-  wcss[i]<- sum(kmeans(female, i)$withinss)
-plot(1:10, wcss, type="b", main=paste('Clusters vs. WCSS'),xlab='Number of Clusters for Female', ylab='Within Cluster Sum of Squares (WCSS)')
+  wcss[i] <- sum(kmeans(female, i)$withinss)
+plot(1:10, wcss, type = "b", main = 'Clusters vs. WCSS', xlab = 'Number of Clusters for Female', ylab = 'Within Cluster Sum of Squares (WCSS)')
 ```
 
 ![](Customer-Segmentation_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
 
 ```r
-kmeans_male<-kmeans(male, 5,iter.max=300, nstart=10)
+kmeans_male <- kmeans(male, 5, iter.max=300, nstart=10)
 kmeans_male
 ```
 
@@ -281,7 +281,7 @@ kmeans_male
 
 
 ```r
-kmeans_female<-kmeans(female, 5,iter.max=300, nstart=10)
+kmeans_female <- kmeans(female, 5, iter.max=300, nstart=10)
 kmeans_female
 ```
 
@@ -319,5 +319,3 @@ kmeans_female
 ## [1] "cluster"      "centers"      "totss"        "withinss"     "tot.withinss"
 ## [6] "betweenss"    "size"         "iter"         "ifault"
 ```
-
-
