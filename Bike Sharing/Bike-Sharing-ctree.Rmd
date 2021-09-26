@@ -37,10 +37,6 @@ output:
 **count** - number of total rentals
 
 ```{r warning=FALSE, message=FALSE}
-library(rpart)
-library(rpart.plot)
-library(rattle)
-library(data.table)
 library(partykit)
 library(RCurl)
 ```
@@ -48,10 +44,8 @@ library(RCurl)
 ### 1. Reading files
 
 ```{r}
-url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Bike%20Sharing/train.csv')
-train <- read.csv(text = url) 
-url <- getURL('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Bike%20Sharing/test.csv')
-test <- read.csv(text = url) 
+train <- read.csv('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Bike%20Sharing/train.csv') 
+test <- read.csv('https://raw.githubusercontent.com/frankwwu/R-Knots/master/Bike%20Sharing/test.csv') 
 ```
 
 ### 2. Feature selection
@@ -84,16 +78,19 @@ fit <- ctree(formula, data=train)
 
 # Print the tree
 print(fit)
-#plot(fit, type = "simple")
+```
+
+```{r, fig.width=18}
+plot(fit, type = "simple")
 ```
 
 ### 4. Prediction
 
 ```{r}
 predict <- predict(fit, test)
-#plot(predict, type = "simple")
+plot(predict, type = "simple")
 #text(predict)
 result <- data.frame(datetime = test$datetime, temp = test$temp, month = test$month, workingday = test$workingday, count=predict)
-write.csv(result, file="ctree_result.csv", row.names=FALSE)
+write.csv(result, file="ctree_result.csv", row.names = FALSE)
 ```
 
