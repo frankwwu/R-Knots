@@ -1,0 +1,24 @@
+---
+title: "Russian Servicemen Fighting in Ukraine"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+* Data source: https://s3.documentcloud.org/documents/21280272/orcs.pdf
+
+* I have tried using Python with camelot, but it was too slow to complete. 
+
+```{r}
+library(pdftools)
+```
+
+```{r}
+ds <- pdf_text('https://s3.documentcloud.org/documents/21280272/orcs.pdf')
+length(ds)
+```
+
+```{r}
+pages <- strsplit(ds, '\n')
+head(pages)
+```
